@@ -1,0 +1,16 @@
+title: $:/
+
+SiteTitle: tw5-srs
+SiteSubtitle: TiddlyWiki plugin for organizing spaced repetitions
+DefaultTiddlers: Home
+config/Navigation/openLinkFromInsideRiver: above 
+config/TiddlerInfo/Mode: sticky
+palette: $:/palettes/Twilight
+theme: $:/themes/tiddlywiki/vanilla
+themes/tiddlywiki/vanilla/metrics/bodyfontsize: 16px
+themes/tiddlywiki/vanilla/metrics/fontsize: 16px
+themes/tiddlywiki/vanilla/metrics/lineheight: 22px
+themes/tiddlywiki/vanilla/metrics/sidebarwidth: 30em
+themes/tiddlywiki/vanilla/options/sidebarlayout: fluid-fixed
+themes/tiddlywiki/vanilla/options/stickytitles: yes
+themes/tiddlywiki/vanilla/settings/editorfontfamily: monospace

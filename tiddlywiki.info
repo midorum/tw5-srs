@@ -1,0 +1,10 @@
+{
+    "plugins": [
+        "tiddlywiki/tiddlyweb",
+        "tiddlywiki/filesystem"
+    ],
+    "themes": [
+        "tiddlywiki/snowwhite",
+        "tiddlywiki/vanilla"
+    ]
+}
