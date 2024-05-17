@@ -1,0 +1,17 @@
+created: 20240516104145212
+modified: 20240516134457328
+title: Country Capital Question Card
+type: text/vnd.tiddlywiki
+
+\parameters (
+ src,
+ random
+)
+
+Question:
+
+<h2>
+<$tiddler tiddler=<<src>>>
+What is the capital of {{!!title}}?
+</$tiddler>
+</h2>

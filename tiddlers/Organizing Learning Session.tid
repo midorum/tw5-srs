@@ -1,0 +1,20 @@
+created: 20240516102434996
+modified: 20240517163604519
+title: Organizing Learning Session
+type: text/vnd.tiddlywiki
+
+Once you've added a few tiddlers to your spaced repetition system, it's time to start training.
+
+SRS does not automatically create flashcards for training, since it knows absolutely nothing about the structure of your data. Therefore, first, let's create a [[card containing a question about the capital of the country|Country Capital Question Card]] (we will consider this a question in the “forward” direction). We will also need a [[card to answer this question|Country Capital Answer Card]].
+
+<<<
+If you look at the contents of our cards, you will see that they are extremely simple. They take two parameters: the `src` parameter, which contains the title of the tiddler that the SRS has chosen for the question (and answer), and the `random` parameter, which contains some random number.
+
+We will directly use the `src` parameter to receive data from the tiddler with our data and draw the contents of the card depending on its type.
+
+The `random` parameter contains a random number generated for each question. We will not use it now, so as not to complicate the description. It can be useful when you have to get a random item for a question from a list associated with the tiddler you are studying. For example, for each country, you can determine a list of its cities and give yourself a quiz “Guess the country by a random city.” If you use the plugin's standard session management [[template|SrsLearningSessionTemplate]], then you can count on the fact that the random number will be the same for the question and answer and will not change until you click the answer rate button. 
+<<<
+
+We will also create similar cards for [[question|Capital Country Question Card]] and [[answer|Capital Country Answer Card]] in the "backward" direction (identify a country by its capital).
+
+We will also need a form for the training session where you will create a new training session and answer the questions asked by SRS. To make things easier for you, SRS offers for your convenience a special template [[SrsLearningSessionTemplate]], which contains all the functionality related to managing a training session. All you need to do is include this template on your form and specify your question and answer cards. Of course, you can implement your own template using the one proposed as an example. Don't be afraid to experiment. So, our [[form|Learning Session Example]] for conducting a training session, designed to study countries and their capitals, will be very simple.

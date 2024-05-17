@@ -1,0 +1,29 @@
+created: 20240517060734348
+modified: 20240517061406623
+tags: $:/tags/Stylesheet
+title: $:/plugins/midorum/srs/ui/styles.css
+type: text/css
+
+section.srs-learning-session-form button {
+ margin: 3px;
+}
+
+section.srs-learning-session-form svg {
+ vertical-align: text-bottom;
+}
+
+section.srs-learning-session-form .srs-learning-session-form-icon {
+ display: inline-block;
+ width: 1.5em;
+}  
+
+table.srs-learning-session-form-actions-table {
+ width:100%;
+ table-layout: fixed;
+ border-collapse: collapse;
+ border: none;
+}
+
+table.srs-learning-session-form-actions-table td {
+ border: none;
+}

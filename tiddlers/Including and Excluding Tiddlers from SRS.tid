@@ -1,0 +1,139 @@
+created: 20240509164930645
+modified: 20240517155104676
+tags: 
+title: Including and Excluding Tiddlers from SRS
+type: text/vnd.tiddlywiki
+
+\procedure capitalSection()
+<$text
+ text="Capital: "
+/><$transclude
+ $tiddler=<<currentTiddler>>
+ $field="capital"
+/>
+\end capitalSection
+
+\procedure descriptionSection()
+<$text
+ text="Short description: "
+/><$transclude
+ $tiddler=<<currentTiddler>>
+ $mode=block
+/>
+\end descriptionSection
+
+\procedure srsButtons()
+\define scheduleAction(direction)
+<$action-sendmessage
+ $message="tm-srs-schedule"
+ ref=<<currentTiddler>>
+ direction=$direction$
+/>
+\end scheduleAction
+\define unscheduleAction(direction)
+<$action-sendmessage
+ $message="tm-srs-unschedule"
+ ref=<<currentTiddler>>
+ direction=$direction$
+/>
+\end unscheduleAction
+<div><$list
+ filter="[<currentTiddler>!tag[$:/srs/tags/scheduledForward]]"
+><$button
+ actions=<<scheduleAction forward>>
+><$text
+ text="Schedule forward"
+/></$button></$list><$list
+ filter="[<currentTiddler>tag[$:/srs/tags/scheduledForward]]"
+><$button
+ actions=<<unscheduleAction forward>>
+><$text
+ text="Unschedule forward"
+/></$button></$list><$text
+ text=" "
+/><$list
+ filter="[<currentTiddler>!tag[$:/srs/tags/scheduledBackward]]"
+><$button
+ actions=<<scheduleAction backward>>
+><$text
+ text="Schedule backward"
+/></$button></$list><$list
+ filter="[<currentTiddler>tag[$:/srs/tags/scheduledBackward]]"
+><$button
+ actions=<<unscheduleAction backward>>
+><$text
+ text="Unschedule backward"
+/></$button></$list></div>
+\end srsButtons
+
+\procedure srsCheckTimeInfo()
+<div><$list
+ filter="[<currentTiddler>tag[$:/srs/tags/scheduledForward]]"
+ emptyMessage="This tiddler is not scheduled in forward direction"
+><$list
+ filter="[<currentTiddler>get[srs-forward-due]format:timestamp[YY/0MM/0DD 0hh:0mm]]"
+ emptyMessage="This tiddler is scheduled in forward direction but hasn't been asked yet"
+><$text
+ text="Forward check due at: "
+/><$text
+ text=<<currentTiddler>>
+/></$list></$list></div><div><$list
+ filter="[<currentTiddler>tag[$:/srs/tags/scheduledBackward]]"
+ emptyMessage="This tiddler is not scheduled in backward direction"
+><$list
+ filter="[<currentTiddler>get[srs-backward-due]format:timestamp[YY/0MM/0DD 0hh:0mm]]"
+ emptyMessage="This tiddler is scheduled in backward direction but hasn't been asked yet"
+><$text
+ text="Backward check due at: "
+/><$text
+ text=<<currentTiddler>>
+/></$list></$list></div>
+\end srsCheckTimeInfo
+
+\procedure srsSection()
+<$transclude
+ $variable=srsButtons
+ $mode=block
+/><$transclude
+ $variable=srsCheckTimeInfo
+ $mode=block
+/>
+\end srsSection
+
+!! Organizing data
+
+Let's say we want to study all the countries and their capitals. This is a fairly simple example, but it will show the basic aspects of working with SRS. This wiki already has several tiddlers with information about countries. You can see their contents below.
+
+<<<
+Please note that all records about countries are organized in the same way. The key to correct understanding and acquisition of information is its correct organization.
+<<<
+
+<<<
+Also, each tiddler has a `Country` tag to separate information about countries from, let's say, information about continents and oceans.
+<<<
+
+<<<
+To schedule tiddler in SRS just add `$:/srs/tags/scheduledForward` tag and `$:/srs/tags/scheduledBackward` tag for forward and backward direction accordingly. You can do it manually or by pressing the button.
+<<<
+
+<$list
+ filter="[tag[Country]]"
+><$link
+ to=<<currentTiddler>>
+><h2><$view
+ field="title"
+/></h2></$link><$transclude
+ $variable=capitalSection
+ $mode=block
+/><$transclude
+ $variable=descriptionSection
+ $mode=block
+/><$transclude
+ $variable=srsSection
+ $mode=block
+/>
+</$list>
+
+!! What's next
+
+Let's organize a [[learning session|Organizing Learning Session]] according to our data.

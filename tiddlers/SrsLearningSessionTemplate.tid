@@ -1,0 +1,115 @@
+created: 20240517105618962
+modified: 20240517144456645
+title: SrsLearningSessionTemplate
+type: text/vnd.tiddlywiki
+
+!! Introduction
+
+The [[$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate]] template is designed to make it easier to manage a learning session in SRS.
+
+!! Attributes
+
+| !Attribute | !Required | !Description |
+|!src | yes |tag by which tiddlers will be selected to fill the training session |
+|!forwardQuestionTemplate | yes |title of the template tiddler to display the question in the forward direction |
+|!forwardAnswerTemplate | yes |title of the template tiddler to display the answer in the forward direction |
+|!backwardQuestionTemplate | yes |title of the template tiddler to display the question in the backward direction |
+|!backwardAnswerTemplate | yes |title of the template tiddler to display the answer in the backward direction |
+|!session | no |temporary tiddler to storing session data |
+|!buttonsDisabledState | no |temporary tiddler to manage disabling and enabling answer buttons by timeout |
+|!groupFilter | no |filter to additional grouping tiddlers within the `src` tag |
+|!groupStrategy | no |strategy to select tiddlers inside groups by `groupFilter` attribute |
+|!limit | no |limiting the number of tiddlers for one session (by default 100) |
+|!answerLatency | no |delay before the answer rating buttons become active in milliseconds (by default 1000 =1sec) |
+|!directions | no |list of possible directions for learning (by default "forward backward both") |
+|!directionButtons | no |a list of button names for starting a learning session for different directions; must match the structure and size to the `directions` list |
+|!buttonClass | no |CSS classes for template buttons |
+|!resetButtonText | no |text of the button to reset the question to the beginning of the learning curve |
+|!holdButtonText | no |text of the button to hold the question at the current position of the learning curve |
+|!onwardButtonText | no |text of the button to advance the question to the next position of the learning curve |
+|!answerTipText | no |the text of the hint displayed at the bottom of the answer card and explaining how to correctly interpret your answer |
+
+Supported values for `directions` attribute:
+
+|!forward |Only tiddlers scheduled in the forward direction (having the tag `$:/srs/tags/scheduledForward`) will be selected for the learning session. |
+|!backward |Only tiddlers scheduled in the backward direction (having the tag `$:/srs/tags/scheduledBackward`) will be selected for the learning session. |
+|!both |Tiddlers scheduled in any direction (having any of the above tags) will be selected for the learning session. |
+
+Possible values for `groupStrategy` attribute:
+
+|!groupOnly |the tiddler belongs the group, specified in `groupFilter` |
+|!notInGroup |the tiddler does not belong the group, specified in `groupFilter` |
+|!oneFromGroup |only one tiddler will be taken for each group, specified in `groupFilter` |
+
+!! Examples
+
+The simplest form:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ src="Country"
+ forwardQuestionTemplate="Country Capital Question Card"
+ forwardAnswerTemplate="Country Capital Answer Card"
+ backwardQuestionTemplate="Capital Country Question Card"
+ backwardAnswerTemplate="Capital Country Answer Card"
+/>
+```
+
+With custom directions buttons:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ src="Country"
+ forwardQuestionTemplate="Country Capital Question Card"
+ forwardAnswerTemplate="Country Capital Answer Card"
+ backwardQuestionTemplate="Capital Country Question Card"
+ backwardAnswerTemplate="Capital Country Answer Card"
+ directions="forward bacward"
+ directionButtons="[[Study In Forward Direction]] [[Study In Bacward Direction]]"
+/>
+```
+
+or to learn in both directions:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ src="Country"
+ forwardQuestionTemplate="Country Capital Question Card"
+ forwardAnswerTemplate="Country Capital Answer Card"
+ backwardQuestionTemplate="Capital Country Question Card"
+ backwardAnswerTemplate="Capital Country Answer Card"
+ directions="both"
+ directionButtons="[[Start Stidying]]"
+/>
+```
+
+With custom buttons CSS classes:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ src="Country"
+ forwardQuestionTemplate="Country Capital Question Card"
+ forwardAnswerTemplate="Country Capital Answer Card"
+ backwardQuestionTemplate="Capital Country Question Card"
+ backwardAnswerTemplate="Capital Country Answer Card"
+ buttonClass="tc-btn-invisible tc-tiddlylink"
+/>
+```
+
+With custom answer latency:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ src="Country"
+ forwardQuestionTemplate="Country Capital Question Card"
+ forwardAnswerTemplate="Country Capital Answer Card"
+ backwardQuestionTemplate="Capital Country Question Card"
+ backwardAnswerTemplate="Capital Country Answer Card"
+ answerLatency=500
+/>
+```
