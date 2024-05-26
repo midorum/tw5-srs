@@ -46,9 +46,10 @@ Handling SRS messages.
         src: tiddler.fields.title
       };
     }
-    function initialize(src, direction, groupFilter, groupStrategy) {
+    function initialize(src, direction, groupFilter, groupStrategy, context) {
       _context = {
-        tags: cache.getTags(["scheduledForward", "scheduledBackward"])
+        tags: cache.getTags(["scheduledForward", "scheduledBackward"]),
+        wikiUtils: context.wikiUtils
       };
       _src = src;
       _takeForward = direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION;
@@ -60,7 +61,7 @@ Handling SRS messages.
     }
     function groupStrategyIsSatisfied(title) {
       if (!_groupFilter) return true;
-      const titleGroup = $tw.wiki.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+      const titleGroup = _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
       if (_groupStrategy === "groupOnly") {
         return titleGroup.length !== 0; // the tiddler belongs the group
       }
@@ -81,32 +82,33 @@ Handling SRS messages.
       _repeat = [];
       _overdue = [];
       _newcomer = [];
-      utils.allTitlesWithTag(_src)
+      _context.wikiUtils.allTitlesWithTag(_src)
         .forEach(title => {
           if (!groupStrategyIsSatisfied(title)) return;
-          const tiddler = $tw.wiki.getTiddler(title);
-          if (_takeForward) {
-            const forwardEntry = getForwardEntry(tiddler);
-            if (forwardEntry) {
-              if (!forwardEntry.due) {
-                _newcomer.push(forwardEntry);
-                return; // if we have taken forward we skip backward for same source
-              } else if (forwardEntry.due <= now) {
-                _overdue.push(forwardEntry);
-                return; // if we have taken forward we skip backward for same source
+          _context.wikiUtils.doWithTiddlerInstance(title, instance => {
+            if (_takeForward) {
+              const forwardEntry = getForwardEntry(instance);
+              if (forwardEntry) {
+                if (!forwardEntry.due) {
+                  _newcomer.push(forwardEntry);
+                  return; // if we have taken forward we skip backward for same source
+                } else if (forwardEntry.due <= now) {
+                  _overdue.push(forwardEntry);
+                  return; // if we have taken forward we skip backward for same source
+                }
               }
             }
-          }
-          if (_takeBackward) {
-            const backwardEntry = getBackwardEntry(tiddler);
-            if (backwardEntry) {
-              if (!backwardEntry.due) {
-                _newcomer.push(backwardEntry);
-              } else if (backwardEntry.due <= now) {
-                _overdue.push(backwardEntry);
+            if (_takeBackward) {
+              const backwardEntry = getBackwardEntry(instance);
+              if (backwardEntry) {
+                if (!backwardEntry.due) {
+                  _newcomer.push(backwardEntry);
+                } else if (backwardEntry.due <= now) {
+                  _overdue.push(backwardEntry);
+                }
               }
             }
-          }
+          })
         });
       _overdue.sort(_comparator);
       _ttl = now + 600000; // 10 minutes
@@ -221,7 +223,7 @@ Handling SRS messages.
     });
   }
 
-  // under testing
+  // tested
   exports.unschedule = function (ref, direction, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:unschedule");
@@ -230,7 +232,6 @@ Handling SRS messages.
       wikiUtils: utils.getWikiUtils(widget.wiki)
     };
     const supportedDirections = utils.getSupportedDirections();
-
     ref = utils.trimToUndefined(ref);
     if (!ref) {
       logger.alert(utils.format(alertMsg, "ref"));
@@ -260,7 +261,7 @@ Handling SRS messages.
     });
   }
 
-  // under testing; needs refactoring
+  // under testing
   exports.createSession = function (ref, src, direction, limit, groupFilter, groupStrategy, log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:createSession");
@@ -290,7 +291,7 @@ Handling SRS messages.
       return;
     }
     const first = session.getFirst(src, direction, groupFilter, groupStrategy, log);
-    const nextSteps = first.entry ? getNextStepsForTiddlerTitle(first.entry.src, first.entry.direction) : undefined;
+    const nextSteps = first.entry ? getNextStepsForTiddlerTitle(first.entry.src, first.entry.direction, context) : undefined;
     const data = {};
     data["src"] = src;
     data["direction"] = direction;
@@ -308,35 +309,30 @@ Handling SRS messages.
     data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
     data["estimatedEndTime"] = calculateEstimatedEndTime(first.counters);
     data["created"] = new Date().getTime();
-    utils.setTiddlerData(ref, data);
+    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
+      unsafe.doNotInvokeSequentiallyOnSameTiddler.setTiddlerData(instance, data);
+    });
   };
 
-  // under testing; needs refactoring
+  // under testing
   exports.commitAnswer = function (ref, src, direction, answer, log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:commitAnswer");
     const context = {
       wikiUtils: utils.getWikiUtils(widget.wiki)
     };
-
     ref = utils.trimToUndefined(ref);
     if (!ref) {
       logger.alert(utils.format(alertMsg, "ref"));
       return;
     }
-    const sessionTiddler = $tw.wiki.getTiddler(ref);
-    if (!sessionTiddler) {
+    if (!context.wikiUtils.doWithTiddlerInstance(ref, instance => !!instance)) {
       logger.alert("SRS session not found: " + ref);
       return;
     }
     src = utils.trimToUndefined(src);
     if (!src) {
       logger.alert(utils.format(alertMsg, "src"));
-      return;
-    }
-    const srcTiddler = $tw.wiki.getTiddler(src);
-    if (!srcTiddler) {
-      logger.alert("Source tiddler not found: " + src);
       return;
     }
     direction = utils.trimToUndefined(direction);
@@ -361,7 +357,14 @@ Handling SRS messages.
       console.log("SRS:commitAnswer", idle, ref, src, direction, answer);
       return;
     }
-    const newDue = updateSrsFields(srcTiddler, direction, answer);
+    const newDue = context.wikiUtils.doWithTiddlerInstance(src, (instance, unsafe) => {
+      if (!instance) {
+        logger.alert("Source tiddler not found: " + src);
+        return undefined;
+      }
+      return updateSrsFields(instance, direction, answer);
+    });
+    if (!newDue) return;
     const next = session.acceptAnswerAndGetNext(src, newDue, log);
     const nextSteps = next.entry ? getNextStepsForTiddlerTitle(next.entry.src, next.entry.direction) : undefined;
     const data = {};
@@ -376,7 +379,9 @@ Handling SRS messages.
     data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
     data["estimatedEndTime"] = calculateEstimatedEndTime(next.counters);
     data["modified"] = new Date().getTime();
-    utils.setTiddlerData(ref, data);
+    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
+      unsafe.doNotInvokeSequentiallyOnSameTiddler.setTiddlerData(instance, data);
+    });
   };
 
   // all spaced repetition calcualtion logic is here
@@ -405,26 +410,30 @@ Handling SRS messages.
     return (due && last) ? getNextSteps(due - last) : getNextSteps();
   }
 
-  function getNextStepsForTiddlerTitle(tiddlerTitle, direction) {
-    return getNextStepsForTiddler($tw.wiki.getTiddler(tiddlerTitle), getSrsFieldsNames(direction));
+  function getNextStepsForTiddlerTitle(tiddlerTitle, direction, context) {
+    context.wikiUtils.doWithTiddlerInstance(tiddlerTitle, instance => {
+      return getNextStepsForTiddler(instance, getSrsFieldsNames(direction));
+    })
   }
 
-  function updateSrsFields(tiddler, direction, answer) {
+  function updateSrsFields(tiddler, direction, answer, context) {
     const srsFieldsNames = getSrsFieldsNames(direction);
     const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames);
     const now = new Date().getTime();
     const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + nextSteps.hold
       : answer === utils.SRS_ANSWER_ONWARD ? now + nextSteps.onward
         : now + nextSteps.reset).getTime();
-    storeSrsFields(tiddler, srsFieldsNames, newDue, now);
+    storeSrsFields(tiddler, srsFieldsNames, newDue, now, context);
     return newDue;
   }
 
-  function storeSrsFields(tiddler, srsFieldsNames, newDue, newLast) {
+  function storeSrsFields(tiddler, srsFieldsNames, newDue, newLast, context) {
     const fields = {};
     fields[srsFieldsNames.dueField] = newDue;
     fields[srsFieldsNames.lastField] = newLast;
-    utils.setTiddlerFields(tiddler, fields);
+    context.wikiUtils.doWithTiddlerInstance(tiddler, (instance, unsafe) => {
+      unsafe.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(instance, fields);
+    })
   }
 
   function calculateEstimatedEndTime(counters) {

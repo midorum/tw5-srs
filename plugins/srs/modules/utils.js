@@ -111,10 +111,6 @@ SRS utility functions.
   // Below are pure wiki-sensitive functions
   function getWikiUtils(wiki) {
 
-    function generateNewInternalTitle(prefix) {
-      return wiki.generateNewTitle(prefix + Date.now(), GENERATE_TITLE_OPTIONS);
-    }
-
     function getTiddlerTitle(titleOrTiddler) {
       return (titleOrTiddler instanceof $tw.Tiddler) ? titleOrTiddler.fields.title : titleOrTiddler;
     }
@@ -128,15 +124,6 @@ SRS utility functions.
       tag = trimToUndefined(tag);
       if (!tag) return;
       return wiki.getTiddlersWithTag(tag);
-    }
-
-    function tiddlerExists(title) {
-      return wiki.tiddlerExists(title);
-    }
-
-    function getTiddlerField(titleOrTiddler, field, defaultValue) {
-      if (!titleOrTiddler || !field) return undefined;
-      return getTiddlerInstance(titleOrTiddler).getFieldString(field, defaultValue);
     }
 
     function getTiddlerTagsShallowCopy(titleOrTiddler) {
@@ -203,14 +190,6 @@ SRS utility functions.
       },
 
       // *
-      setTiddlerField: function (titleOrTiddler, field, value) {
-        if (!titleOrTiddler || !field) return;
-        const data = {};
-        data[field] = value;
-        updateTiddler(titleOrTiddler, data);
-      },
-
-      // *
       // Set a tiddlers content to a JavaScript object.
       setTiddlerData: function (titleOrTiddler, dataObj) {
         if (!titleOrTiddler || !dataObj) return;
@@ -250,10 +229,7 @@ SRS utility functions.
       wiki: wiki,
       unsafe: unsafe,
       doWithTiddlerInstance: doWithTiddlerInstance,
-      generateNewInternalTitle: generateNewInternalTitle,
-      tiddlerExists: tiddlerExists,
       filterTiddlers: filterTiddlers,
-      getTiddlerField: getTiddlerField,
       allTitlesWithTag: allTitlesWithTag,
       getTiddlerTagsShallowCopy: getTiddlerTagsShallowCopy,
     };
@@ -261,75 +237,5 @@ SRS utility functions.
   }
 
   exports.getWikiUtils = getWikiUtils;
-
-  // deprecated
-  function allTitlesWithTag(tag) {
-    tag = trimToUndefined(tag);
-    if (!tag) return;
-    return $tw.wiki.getTiddlersWithTag(tag);
-  }
-
-  exports.allTitlesWithTag = allTitlesWithTag;
-
-  // deprecated
-  exports.allTiddlersWithTag = function (tag) {
-    return allTitlesWithTag(tag)
-      .map(title => $tw.wiki.getTiddler(title));
-  };
-
-  // not pure
-  // deprecated
-  exports.setTiddlerField = function (tiddlerTitle, field, value) {
-    if (!tiddlerTitle || !field) return;
-    $tw.wiki.setText(tiddlerTitle, field, undefined, value, {});
-  }
-
-  // not pure
-  // deprecated
-  exports.setTiddlerFields = function (tiddler, fieldsMap) {
-    if (!tiddler || !fieldsMap) return;
-    const modification = $tw.wiki.getModificationFields();
-    $tw.wiki.addTiddler(new $tw.Tiddler(tiddler, fieldsMap, modification));
-  }
-
-  // not pure
-  // deprecated
-  exports.setTiddlerData = function (tiddlerTitle, dataObj) {
-    if (!tiddlerTitle || !dataObj) return;
-    const data = $tw.wiki.getTiddlerData(tiddlerTitle, Object.create(null));
-    Object.entries(dataObj).forEach(([key, value]) => {
-      if (value !== undefined) {
-        data[key] = value;
-      } else {
-        delete data[key];
-      }
-    });
-    $tw.wiki.setTiddlerData(tiddlerTitle, data, {}, {});
-  }
-
-  // not pure
-  // deprecated
-  exports.addTagToTiddler = function (tiddler, tag) {
-    if (!tiddler) return;
-    const modification = $tw.wiki.getModificationFields();
-    modification.tags = (tiddler.fields.tags || []).slice(0);
-    $tw.utils.pushTop(modification.tags, tag);
-    $tw.wiki.addTiddler(new $tw.Tiddler(tiddler, modification));
-  }
-
-  // not pure
-  // deprecated
-  exports.removeTagFromTiddler = function (tiddler, tagTitle) {
-    if (!tiddler || !tiddler.fields.tags || !tiddler.fields.tags.length) return;
-    var index = tiddler.fields.tags.indexOf(tagTitle);
-    if (index === -1) return;
-    const modification = $tw.wiki.getModificationFields();
-    modification.tags = tiddler.fields.tags.slice(0);
-    modification.tags.splice(index, 1);
-    if (modification.tags.length === 0) {
-      modification.tags = undefined;
-    }
-    $tw.wiki.addTiddler(new $tw.Tiddler(tiddler, modification));
-  }
 
 })();
