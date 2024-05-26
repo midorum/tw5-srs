@@ -74,21 +74,16 @@ SRS utility functions.
     return a.every(e => b.includes(e));
   }
 
-  function allTitlesWithTag(tag) {
-    tag = trimToUndefined(tag);
-    if (!tag) return;
-    return $tw.wiki.getTiddlersWithTag(tag);
+  function purgeArray(srcArray, purgeArray) {
+    if (!srcArray || !purgeArray || !Array.isArray(srcArray) || !Array.isArray(purgeArray)) return undefined;
+    return srcArray.filter(el => !purgeArray.includes(el));
   }
 
   exports.trimToUndefined = trimToUndefined;
-
   exports.parseJsonOrUndefined = parseJsonOrUndefined;
-
   exports.parseInteger = parseInteger;
-
   exports.arraysAreEqual = arraysAreEqual;
-
-  exports.allTitlesWithTag = allTitlesWithTag;
+  exports.purgeArray = purgeArray;
 
   exports.getSupportedDirections = function () {
     return SUPPORTED_DIRECTIONS.slice();
@@ -113,18 +108,184 @@ SRS utility functions.
     });
   }
 
+  // Below are pure wiki-sensitive functions
+  function getWikiUtils(wiki) {
+
+    function generateNewInternalTitle(prefix) {
+      return wiki.generateNewTitle(prefix + Date.now(), GENERATE_TITLE_OPTIONS);
+    }
+
+    function getTiddlerTitle(titleOrTiddler) {
+      return (titleOrTiddler instanceof $tw.Tiddler) ? titleOrTiddler.fields.title : titleOrTiddler;
+    }
+
+    function getTiddlerInstance(titleOrTiddler) {
+      return (titleOrTiddler instanceof $tw.Tiddler) ? titleOrTiddler : wiki.getTiddler(titleOrTiddler);
+    }
+
+    // *
+    function allTitlesWithTag(tag) {
+      tag = trimToUndefined(tag);
+      if (!tag) return;
+      return wiki.getTiddlersWithTag(tag);
+    }
+
+    function tiddlerExists(title) {
+      return wiki.tiddlerExists(title);
+    }
+
+    function getTiddlerField(titleOrTiddler, field, defaultValue) {
+      if (!titleOrTiddler || !field) return undefined;
+      return getTiddlerInstance(titleOrTiddler).getFieldString(field, defaultValue);
+    }
+
+    function getTiddlerTagsShallowCopy(titleOrTiddler) {
+      if (!titleOrTiddler) return undefined;
+      return (getTiddlerInstance(titleOrTiddler).fields.tags || []).slice(0);
+    }
+
+    function filterTiddlers(filterString, widget, source) {
+      return wiki.filterTiddlers(filterString, widget, source);
+    }
+
+    function doWithTiddlerInstance(titleOrTiddler, callback) {
+      if (!titleOrTiddler || !callback) return;
+      return callback.call(null, getTiddlerInstance(titleOrTiddler), { doNotInvokeSequentiallyOnSameTiddler: doNotInvokeSequentiallyOnSameTiddler });
+    }
+
+    // Below are non-pure unsafe functions
+    const unsafe = {
+
+      addTiddler: function (fields) {
+        wiki.addTiddler(new $tw.Tiddler(
+          wiki.getCreationFields(),
+          fields,
+          wiki.getModificationFields()));
+      },
+
+      deleteTiddler: function (title) {
+        wiki.deleteTiddler(title);
+      }
+
+    }
+
+    // Below are non-pure unsafe functions that use TiddlyWiki message mechanism - they all shouldn't be invoked sequentially for the same tiddler
+    function updateTiddler(titleOrTiddler, fields) {
+      if (!titleOrTiddler || !fields) return;
+      wiki.addTiddler(new $tw.Tiddler(
+        getTiddlerInstance(titleOrTiddler),
+        fields,
+        wiki.getModificationFields()));
+    };
+
+    const doNotInvokeSequentiallyOnSameTiddler = {
+
+      // *
+      updateTiddler: updateTiddler,
+
+      // *
+      addTagsToTiddler: function (titleOrTiddler, tags) {
+        if (!titleOrTiddler || !tags) return;
+        const tagsToAdd = ($tw.utils.isArray(tags) ? tags : [tags]).filter(tag => tag);
+        const tiddlerTags = getTiddlerTagsShallowCopy(titleOrTiddler);
+        updateTiddler(titleOrTiddler, {
+          tags: tiddlerTags.concat(purgeArray(tagsToAdd, tiddlerTags))
+        })
+      },
+
+      // *
+      deleteTagsToTiddler: function (titleOrTiddler, tags) {
+        if (!titleOrTiddler || !tags) return;
+        const tagsToDelete = ($tw.utils.isArray(tags) ? tags : [tags]).filter(tag => tag);
+        updateTiddler(titleOrTiddler, {
+          tags: purgeArray(getTiddlerTagsShallowCopy(titleOrTiddler), tagsToDelete)
+        });
+      },
+
+      // *
+      setTiddlerField: function (titleOrTiddler, field, value) {
+        if (!titleOrTiddler || !field) return;
+        const data = {};
+        data[field] = value;
+        updateTiddler(titleOrTiddler, data);
+      },
+
+      // *
+      // Set a tiddlers content to a JavaScript object.
+      setTiddlerData: function (titleOrTiddler, dataObj) {
+        if (!titleOrTiddler || !dataObj) return;
+        const tiddlerTitle = getTiddlerTitle(titleOrTiddler);
+        const data = wiki.getTiddlerData(tiddlerTitle, Object.create(null));
+        Object.entries(dataObj).forEach(([key, value]) => {
+          if (value !== undefined) {
+            data[key] = value;
+          } else {
+            delete data[key];
+          }
+        });
+        wiki.setTiddlerData(tiddlerTitle, data, {}, {});
+      },
+
+      appendTiddlerField: function (titleOrTiddler, field, value, separator) {
+        if (!titleOrTiddler || !field) return;
+        const tiddler = getTiddlerInstance(titleOrTiddler);
+        const tiddlerTitle = tiddler.fields.title;
+        if (tiddler) {
+          const current = tiddler.fields[field];
+          if (current && separator) {
+            wiki.setText(tiddlerTitle, field, undefined, current + separator + value, {});
+          } else if (current) {
+            wiki.setText(tiddlerTitle, field, undefined, current + value, {});
+          } else {
+            wiki.setText(tiddlerTitle, field, undefined, value, {});
+          }
+        } else {
+          wiki.setText(tiddlerTitle, field, undefined, value, {});
+        }
+      }
+
+    }
+
+    return {
+      wiki: wiki,
+      unsafe: unsafe,
+      doWithTiddlerInstance: doWithTiddlerInstance,
+      generateNewInternalTitle: generateNewInternalTitle,
+      tiddlerExists: tiddlerExists,
+      filterTiddlers: filterTiddlers,
+      getTiddlerField: getTiddlerField,
+      allTitlesWithTag: allTitlesWithTag,
+      getTiddlerTagsShallowCopy: getTiddlerTagsShallowCopy,
+    };
+
+  }
+
+  exports.getWikiUtils = getWikiUtils;
+
+  // deprecated
+  function allTitlesWithTag(tag) {
+    tag = trimToUndefined(tag);
+    if (!tag) return;
+    return $tw.wiki.getTiddlersWithTag(tag);
+  }
+
+  exports.allTitlesWithTag = allTitlesWithTag;
+
+  // deprecated
   exports.allTiddlersWithTag = function (tag) {
     return allTitlesWithTag(tag)
       .map(title => $tw.wiki.getTiddler(title));
   };
 
   // not pure
+  // deprecated
   exports.setTiddlerField = function (tiddlerTitle, field, value) {
     if (!tiddlerTitle || !field) return;
     $tw.wiki.setText(tiddlerTitle, field, undefined, value, {});
   }
 
   // not pure
+  // deprecated
   exports.setTiddlerFields = function (tiddler, fieldsMap) {
     if (!tiddler || !fieldsMap) return;
     const modification = $tw.wiki.getModificationFields();
@@ -132,6 +293,7 @@ SRS utility functions.
   }
 
   // not pure
+  // deprecated
   exports.setTiddlerData = function (tiddlerTitle, dataObj) {
     if (!tiddlerTitle || !dataObj) return;
     const data = $tw.wiki.getTiddlerData(tiddlerTitle, Object.create(null));
@@ -146,6 +308,7 @@ SRS utility functions.
   }
 
   // not pure
+  // deprecated
   exports.addTagToTiddler = function (tiddler, tag) {
     if (!tiddler) return;
     const modification = $tw.wiki.getModificationFields();
@@ -155,6 +318,7 @@ SRS utility functions.
   }
 
   // not pure
+  // deprecated
   exports.removeTagFromTiddler = function (tiddler, tagTitle) {
     if (!tiddler || !tiddler.fields.tags || !tiddler.fields.tags.length) return;
     var index = tiddler.fields.tags.indexOf(tagTitle);

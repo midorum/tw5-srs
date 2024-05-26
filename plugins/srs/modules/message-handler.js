@@ -183,14 +183,15 @@ Handling SRS messages.
     }
   })();
 
-  exports.schedule = function (ref, direction, idle) {
+  // tested
+  exports.schedule = function (ref, direction, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:schedule");
     const context = {
-      tags: cache.getTags([])
+      tags: cache.getTags([]),
+      wikiUtils: utils.getWikiUtils(widget.wiki)
     };
     const supportedDirections = utils.getSupportedDirections();
-
     ref = utils.trimToUndefined(ref);
     if (!ref) {
       logger.alert(utils.format(alertMsg, "ref"));
@@ -205,23 +206,28 @@ Handling SRS messages.
       console.log("SRS:schedule", idle, ref, direction);
       return;
     }
-    const tiddler = $tw.wiki.getTiddler(ref);
-    if (!tiddler) {
-      return;
-    }
-    if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-      utils.addTagToTiddler(tiddler, context.tags.scheduledForward);
-    }
-    if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-      utils.addTagToTiddler(tiddler, context.tags.scheduledBackward);
-    }
+    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
+      if (!instance) return;
+      const tags = [];
+      if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+        tags.push(context.tags.scheduledForward);
+      }
+      if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+        tags.push(context.tags.scheduledBackward);
+      }
+      if (tags.length) {
+        unsafe.doNotInvokeSequentiallyOnSameTiddler.addTagsToTiddler(instance, tags);
+      }
+    });
   }
 
-  exports.unschedule = function (ref, direction, idle) {
+  // under testing
+  exports.unschedule = function (ref, direction, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:unschedule");
     const context = {
-      tags: cache.getTags([])
+      tags: cache.getTags([]),
+      wikiUtils: utils.getWikiUtils(widget.wiki)
     };
     const supportedDirections = utils.getSupportedDirections();
 
@@ -239,22 +245,28 @@ Handling SRS messages.
       console.log("SRS:unschedule", idle, ref, direction);
       return;
     }
-    const tiddler = $tw.wiki.getTiddler(ref);
-    if (!tiddler) {
-      return;
-    }
-    if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-      utils.removeTagFromTiddler(tiddler, context.tags.scheduledForward);
-    }
-    if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-      utils.removeTagFromTiddler(tiddler, context.tags.scheduledBackward);
-    }
+    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
+      if (!instance) return;
+      const tags = [];
+      if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+        tags.push(context.tags.scheduledForward);
+      }
+      if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+        tags.push(context.tags.scheduledBackward);
+      }
+      if (tags.length) {
+        unsafe.doNotInvokeSequentiallyOnSameTiddler.deleteTagsToTiddler(instance, tags);
+      }
+    });
   }
 
-  exports.createSession = function (ref, src, direction, limit, groupFilter, groupStrategy, log, idle) {
+  // under testing; needs refactoring
+  exports.createSession = function (ref, src, direction, limit, groupFilter, groupStrategy, log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:createSession");
-
+    const context = {
+      wikiUtils: utils.getWikiUtils(widget.wiki)
+    };
     ref = utils.trimToUndefined(ref);
     if (!ref) {
       logger.alert(utils.format(alertMsg, "ref"));
@@ -279,29 +291,33 @@ Handling SRS messages.
     }
     const first = session.getFirst(src, direction, groupFilter, groupStrategy, log);
     const nextSteps = first.entry ? getNextStepsForTiddlerTitle(first.entry.src, first.entry.direction) : undefined;
-		const data = {};
-		data["src"] = src;
-		data["direction"] = direction;
-		data["limit"] = limitValue;
-		data["groupFilter"] = groupFilter;
-		data["groupStrategy"] = groupStrategy;
-		data["current-src"] = first.entry ? first.entry.src : undefined;
-		data["current-direction"] = first.entry ? first.entry.direction : undefined;
-		data["current-due"] = first.entry ? first.entry.due : undefined;
-		data["counter-repeat"] = first.counters.repeat;
-		data["counter-overdue"] = first.counters.overdue;
-		data["counter-newcomer"] = first.counters.newcomer;
-		data["next-step-reset"] = nextSteps ? nextSteps.reset : undefined;
-		data["next-step-hold"] = nextSteps ? nextSteps.hold : undefined;
-		data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
-		data["estimatedEndTime"] = calculateEstimatedEndTime(first.counters);
-		data["created"] = new Date().getTime();
-		utils.setTiddlerData(ref, data);
+    const data = {};
+    data["src"] = src;
+    data["direction"] = direction;
+    data["limit"] = limitValue;
+    data["groupFilter"] = groupFilter;
+    data["groupStrategy"] = groupStrategy;
+    data["current-src"] = first.entry ? first.entry.src : undefined;
+    data["current-direction"] = first.entry ? first.entry.direction : undefined;
+    data["current-due"] = first.entry ? first.entry.due : undefined;
+    data["counter-repeat"] = first.counters.repeat;
+    data["counter-overdue"] = first.counters.overdue;
+    data["counter-newcomer"] = first.counters.newcomer;
+    data["next-step-reset"] = nextSteps ? nextSteps.reset : undefined;
+    data["next-step-hold"] = nextSteps ? nextSteps.hold : undefined;
+    data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
+    data["estimatedEndTime"] = calculateEstimatedEndTime(first.counters);
+    data["created"] = new Date().getTime();
+    utils.setTiddlerData(ref, data);
   };
 
-  exports.commitAnswer = function (ref, src, direction, answer, log, idle) {
+  // under testing; needs refactoring
+  exports.commitAnswer = function (ref, src, direction, answer, log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:commitAnswer");
+    const context = {
+      wikiUtils: utils.getWikiUtils(widget.wiki)
+    };
 
     ref = utils.trimToUndefined(ref);
     if (!ref) {
@@ -349,18 +365,18 @@ Handling SRS messages.
     const next = session.acceptAnswerAndGetNext(src, newDue, log);
     const nextSteps = next.entry ? getNextStepsForTiddlerTitle(next.entry.src, next.entry.direction) : undefined;
     const data = {};
-		data["current-src"] = next.entry ? next.entry.src : undefined;
-		data["current-direction"] = next.entry ? next.entry.direction : undefined;
-		data["current-due"] = next.entry ? next.entry.due : undefined;
-		data["counter-repeat"] = next.counters.repeat;
-		data["counter-overdue"] = next.counters.overdue;
-		data["counter-newcomer"] = next.counters.newcomer;
-		data["next-step-reset"] = nextSteps ? nextSteps.reset : undefined;
-		data["next-step-hold"] = nextSteps ? nextSteps.hold : undefined;
-		data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
-		data["estimatedEndTime"] = calculateEstimatedEndTime(next.counters);
-		data["modified"] = new Date().getTime();
-		utils.setTiddlerData(ref, data);
+    data["current-src"] = next.entry ? next.entry.src : undefined;
+    data["current-direction"] = next.entry ? next.entry.direction : undefined;
+    data["current-due"] = next.entry ? next.entry.due : undefined;
+    data["counter-repeat"] = next.counters.repeat;
+    data["counter-overdue"] = next.counters.overdue;
+    data["counter-newcomer"] = next.counters.newcomer;
+    data["next-step-reset"] = nextSteps ? nextSteps.reset : undefined;
+    data["next-step-hold"] = nextSteps ? nextSteps.hold : undefined;
+    data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
+    data["estimatedEndTime"] = calculateEstimatedEndTime(next.counters);
+    data["modified"] = new Date().getTime();
+    utils.setTiddlerData(ref, data);
   };
 
   // all spaced repetition calcualtion logic is here

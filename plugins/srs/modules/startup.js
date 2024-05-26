@@ -22,23 +22,27 @@ Adds listeners for SRS messages.
   exports.startup = function () {
 
     $tw.rootWidget.addEventListener("tm-srs-schedule", function (event) {
+      const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.schedule(params.ref, params.direction, params.idle);
+      messageHandler.schedule(params.ref, params.direction, params.idle, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-unschedule", function (event) {
+      const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.unschedule(params.ref, params.direction, params.idle);
+      messageHandler.unschedule(params.ref, params.direction, params.idle, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-create-session", function (event) {
+      const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.createSession(params.ref, params.src, params.direction, params.limit, params.groupFilter, params.groupStrategy, params.log, params.idle);
+      messageHandler.createSession(params.ref, params.src, params.direction, params.limit, params.groupFilter, params.groupStrategy, params.log, params.idle, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-commit-answer", function (event) {
+      const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.commitAnswer(params.ref, params.src, params.direction, params.answer, params.log, params.idle);
+      messageHandler.commitAnswer(params.ref, params.src, params.direction, params.answer, params.log, params.idle, widget);
     });
 
   };

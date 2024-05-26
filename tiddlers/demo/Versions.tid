@@ -1,0 +1,16 @@
+created: 20240526160543549
+modified: 20240526161608662
+tags: 
+title: Versions
+type: text/vnd.tiddlywiki
+
+!! 0.2.0
+
+* added unit tests
+
+!! 0.1.0
+
+* first working version
+* basic scheduler functionality
+* template for managing a training session
+* demo tiddlers for initial acquaintance with the work of the plugin

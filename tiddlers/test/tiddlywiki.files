@@ -1,0 +1,30 @@
+{
+	"directories": [
+		{
+			"path": ".",
+			"filesRegExp": "^.*\\.js$",
+			"isTiddlerFile": true,
+			"fields": {
+				"tags": "$:/tags/test-spec",
+				"title": {
+					"source": "filename",
+					"prefix": "test/"
+				},
+				"type": "application/javascript"
+			}
+		},
+		{
+			"path": "./service",
+			"filesRegExp": "^.*$",
+			"isTiddlerFile": true,
+			"fields": {
+				"tags": "$:/tags/test-spec",
+				"title": {
+					"source": "filename",
+					"prefix": "test/service/"
+				},
+				"type": "application/javascript"
+			}
+		}
+	]
+}
