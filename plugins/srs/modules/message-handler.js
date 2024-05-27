@@ -12,7 +12,7 @@ Handling SRS messages.
   /*global $tw: false */
   "use strict";
 
-  const utils = require("$:/plugins/midorum/srs/modules/utils.js");
+  const utils = require("$:/plugins/midorum/srs/modules/utils.js").srsUtils;
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
 
   const session = (function () {
@@ -31,19 +31,19 @@ Handling SRS messages.
     var _groups = [];
     var _current;
     function getForwardEntry(tiddler) {
-      if (!(tiddler.fields.tags || []).includes(_context.tags.scheduledForward)) return undefined;
+      if (!tiddler.getTiddlerTagsShallowCopy().includes(_context.tags.scheduledForward)) return undefined;
       return {
-        due: utils.parseInteger(tiddler.fields[utils.SRS_FORWARD_DUE_FIELD]),
+        due: utils.parseInteger(tiddler.getTiddlerField(utils.SRS_FORWARD_DUE_FIELD)),
         direction: utils.FORWARD_DIRECTION,
-        src: tiddler.fields.title
+        src: tiddler.getTitle()
       };
     }
     function getBackwardEntry(tiddler) {
-      if (!(tiddler.fields.tags || []).includes(_context.tags.scheduledBackward)) return undefined;
+      if (!tiddler.getTiddlerTagsShallowCopy().includes(_context.tags.scheduledBackward)) return undefined;
       return {
-        due: utils.parseInteger(tiddler.fields[utils.SRS_BACKWARD_DUE_FIELD]),
+        due: utils.parseInteger(tiddler.getTiddlerField(utils.SRS_BACKWARD_DUE_FIELD)),
         direction: utils.BACKWARD_DIRECTION,
-        src: tiddler.fields.title
+        src: tiddler.getTitle()
       };
     }
     function initialize(src, direction, groupFilter, groupStrategy, context) {
@@ -85,30 +85,29 @@ Handling SRS messages.
       _context.wikiUtils.allTitlesWithTag(_src)
         .forEach(title => {
           if (!groupStrategyIsSatisfied(title)) return;
-          _context.wikiUtils.doWithTiddlerInstance(title, instance => {
-            if (_takeForward) {
-              const forwardEntry = getForwardEntry(instance);
-              if (forwardEntry) {
-                if (!forwardEntry.due) {
-                  _newcomer.push(forwardEntry);
-                  return; // if we have taken forward we skip backward for same source
-                } else if (forwardEntry.due <= now) {
-                  _overdue.push(forwardEntry);
-                  return; // if we have taken forward we skip backward for same source
-                }
+          const tiddler = _context.wikiUtils.withTiddler(title);
+          if (_takeForward) {
+            const forwardEntry = getForwardEntry(tiddler);
+            if (forwardEntry) {
+              if (!forwardEntry.due) {
+                _newcomer.push(forwardEntry);
+                return; // if we have taken forward we skip backward for same source
+              } else if (forwardEntry.due <= now) {
+                _overdue.push(forwardEntry);
+                return; // if we have taken forward we skip backward for same source
               }
             }
-            if (_takeBackward) {
-              const backwardEntry = getBackwardEntry(instance);
-              if (backwardEntry) {
-                if (!backwardEntry.due) {
-                  _newcomer.push(backwardEntry);
-                } else if (backwardEntry.due <= now) {
-                  _overdue.push(backwardEntry);
-                }
+          }
+          if (_takeBackward) {
+            const backwardEntry = getBackwardEntry(tiddler);
+            if (backwardEntry) {
+              if (!backwardEntry.due) {
+                _newcomer.push(backwardEntry);
+              } else if (backwardEntry.due <= now) {
+                _overdue.push(backwardEntry);
               }
             }
-          })
+          }
         });
       _overdue.sort(_comparator);
       _ttl = now + 600000; // 10 minutes
@@ -159,8 +158,8 @@ Handling SRS messages.
       );
     }
     return {
-      getFirst: function (src, direction, groupFilter, groupStrategy, log) {
-        initialize(src, direction, groupFilter, groupStrategy);
+      getFirst: function (src, direction, groupFilter, groupStrategy, log, context) {
+        initialize(src, direction, groupFilter, groupStrategy, context);
         refill();
         if (log) _log();
         else _groups.length = 0;
@@ -196,31 +195,28 @@ Handling SRS messages.
     const supportedDirections = utils.getSupportedDirections();
     ref = utils.trimToUndefined(ref);
     if (!ref) {
-      logger.alert(utils.format(alertMsg, "ref"));
+      logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
     direction = utils.trimToUndefined(direction);
     if (!direction || !supportedDirections.includes(direction)) {
-      logger.alert(utils.format(alertMsg + " and should be one of %2", "direction", supportedDirections));
+      logger.alert(utils.formatString(alertMsg + " and should be one of %2", "direction", supportedDirections));
       return;
     }
     if (idle) {
       console.log("SRS:schedule", idle, ref, direction);
       return;
     }
-    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
-      if (!instance) return;
-      const tags = [];
-      if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-        tags.push(context.tags.scheduledForward);
-      }
-      if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-        tags.push(context.tags.scheduledBackward);
-      }
-      if (tags.length) {
-        unsafe.doNotInvokeSequentiallyOnSameTiddler.addTagsToTiddler(instance, tags);
-      }
-    });
+    const tags = [];
+    if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+      tags.push(context.tags.scheduledForward);
+    }
+    if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+      tags.push(context.tags.scheduledBackward);
+    }
+    if (tags.length) {
+      context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.addTagsToTiddler(tags);
+    }
   }
 
   // tested
@@ -234,31 +230,28 @@ Handling SRS messages.
     const supportedDirections = utils.getSupportedDirections();
     ref = utils.trimToUndefined(ref);
     if (!ref) {
-      logger.alert(utils.format(alertMsg, "ref"));
+      logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
     direction = utils.trimToUndefined(direction);
     if (!direction || !supportedDirections.includes(direction)) {
-      logger.alert(utils.format(alertMsg + " and should be one of %2", "direction", supportedDirections));
+      logger.alert(utils.formatString(alertMsg + " and should be one of %2", "direction", supportedDirections));
       return;
     }
     if (idle) {
       console.log("SRS:unschedule", idle, ref, direction);
       return;
     }
-    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
-      if (!instance) return;
-      const tags = [];
-      if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-        tags.push(context.tags.scheduledForward);
-      }
-      if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
-        tags.push(context.tags.scheduledBackward);
-      }
-      if (tags.length) {
-        unsafe.doNotInvokeSequentiallyOnSameTiddler.deleteTagsToTiddler(instance, tags);
-      }
-    });
+    const tags = [];
+    if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+      tags.push(context.tags.scheduledForward);
+    }
+    if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
+      tags.push(context.tags.scheduledBackward);
+    }
+    if (tags.length) {
+      context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.deleteTagsToTiddler(tags);
+    }
   }
 
   // under testing
@@ -270,28 +263,32 @@ Handling SRS messages.
     };
     ref = utils.trimToUndefined(ref);
     if (!ref) {
-      logger.alert(utils.format(alertMsg, "ref"));
+      logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
     src = utils.trimToUndefined(src);
     if (!src) {
-      logger.alert(utils.format(alertMsg, "src"));
+      logger.alert(utils.formatString(alertMsg, "src"));
       return;
     }
     direction = utils.trimToUndefined(direction);
-    if (!direction || !utils.getSupportedDirections().includes(direction)) {
+    const supportedDirections = utils.getSupportedDirections();
+    if (!direction) {
       direction = utils.BOTH_DIRECTION;
+    } else if (!supportedDirections.includes(direction)) {
+      logger.alert("direction argument should be one of [" + supportedDirections + "]");
+      return;
     }
     limit = utils.trimToUndefined(limit);
-    var limitValue = limit ? utils.parseNumber(limit, 100) : 100;
+    const limitValue = limit ? utils.parseInteger(limit, 100) : 100;
     groupFilter = utils.trimToUndefined(groupFilter);
     groupStrategy = utils.trimToUndefined(groupStrategy);
     if (idle) {
       console.log("SRS:createSession", idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy);
       return;
     }
-    const first = session.getFirst(src, direction, groupFilter, groupStrategy, log);
-    const nextSteps = first.entry ? getNextStepsForTiddlerTitle(first.entry.src, first.entry.direction, context) : undefined;
+    const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
+    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction)) : undefined;
     const data = {};
     data["src"] = src;
     data["direction"] = direction;
@@ -309,9 +306,7 @@ Handling SRS messages.
     data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
     data["estimatedEndTime"] = calculateEstimatedEndTime(first.counters);
     data["created"] = new Date().getTime();
-    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
-      unsafe.doNotInvokeSequentiallyOnSameTiddler.setTiddlerData(instance, data);
-    });
+    context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.setOrCreateTiddlerData(data);
   };
 
   // under testing
@@ -323,7 +318,7 @@ Handling SRS messages.
     };
     ref = utils.trimToUndefined(ref);
     if (!ref) {
-      logger.alert(utils.format(alertMsg, "ref"));
+      logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
     if (!context.wikiUtils.doWithTiddlerInstance(ref, instance => !!instance)) {
@@ -332,12 +327,12 @@ Handling SRS messages.
     }
     src = utils.trimToUndefined(src);
     if (!src) {
-      logger.alert(utils.format(alertMsg, "src"));
+      logger.alert(utils.formatString(alertMsg, "src"));
       return;
     }
     direction = utils.trimToUndefined(direction);
     if (!direction) {
-      logger.alert(utils.format(alertMsg, "direction"));
+      logger.alert(utils.formatString(alertMsg, "direction"));
       return;
     }
     if (!utils.getAnswerDirections().includes(direction)) {
@@ -346,7 +341,7 @@ Handling SRS messages.
     }
     answer = utils.trimToUndefined(answer);
     if (!answer) {
-      logger.alert(utils.format(alertMsg, "answer"));
+      logger.alert(utils.formatString(alertMsg, "answer"));
       return;
     }
     if (!utils.getSupportedAnswers().includes(answer)) {
@@ -357,16 +352,14 @@ Handling SRS messages.
       console.log("SRS:commitAnswer", idle, ref, src, direction, answer);
       return;
     }
-    const newDue = context.wikiUtils.doWithTiddlerInstance(src, (instance, unsafe) => {
-      if (!instance) {
-        logger.alert("Source tiddler not found: " + src);
-        return undefined;
-      }
-      return updateSrsFields(instance, direction, answer);
-    });
-    if (!newDue) return;
+    const srcTiddler = context.wikiUtils.withTiddler(src);
+    if (!srcTiddler.exists()) {
+      logger.alert("Source tiddler not found: " + src);
+      return;
+    }
+    const newDue = updateSrsFields(srcTiddler, direction, answer);
     const next = session.acceptAnswerAndGetNext(src, newDue, log);
-    const nextSteps = next.entry ? getNextStepsForTiddlerTitle(next.entry.src, next.entry.direction) : undefined;
+    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction)) : undefined;
     const data = {};
     data["current-src"] = next.entry ? next.entry.src : undefined;
     data["current-direction"] = next.entry ? next.entry.direction : undefined;
@@ -379,9 +372,7 @@ Handling SRS messages.
     data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
     data["estimatedEndTime"] = calculateEstimatedEndTime(next.counters);
     data["modified"] = new Date().getTime();
-    context.wikiUtils.doWithTiddlerInstance(ref, (instance, unsafe) => {
-      unsafe.doNotInvokeSequentiallyOnSameTiddler.setTiddlerData(instance, data);
-    });
+    context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.setOrCreateTiddlerData(data);
   };
 
   // all spaced repetition calcualtion logic is here
@@ -405,15 +396,9 @@ Handling SRS messages.
 
   function getNextStepsForTiddler(tiddler, srsFieldsNames) {
     if (!tiddler || !srsFieldsNames) return undefined;
-    const due = utils.parseInteger(tiddler.fields[srsFieldsNames.dueField]);
-    const last = utils.parseInteger(tiddler.fields[srsFieldsNames.lastField]);
+    const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
+    const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
     return (due && last) ? getNextSteps(due - last) : getNextSteps();
-  }
-
-  function getNextStepsForTiddlerTitle(tiddlerTitle, direction, context) {
-    context.wikiUtils.doWithTiddlerInstance(tiddlerTitle, instance => {
-      return getNextStepsForTiddler(instance, getSrsFieldsNames(direction));
-    })
   }
 
   function updateSrsFields(tiddler, direction, answer, context) {
@@ -431,9 +416,7 @@ Handling SRS messages.
     const fields = {};
     fields[srsFieldsNames.dueField] = newDue;
     fields[srsFieldsNames.lastField] = newLast;
-    context.wikiUtils.doWithTiddlerInstance(tiddler, (instance, unsafe) => {
-      unsafe.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(instance, fields);
-    })
+    tiddler.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(fields);
   }
 
   function calculateEstimatedEndTime(counters) {

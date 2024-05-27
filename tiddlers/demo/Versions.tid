@@ -1,5 +1,5 @@
 created: 20240526160543549
-modified: 20240526161608662
+modified: 20240527173359532
 tags: 
 title: Versions
 type: text/vnd.tiddlywiki
@@ -7,6 +7,8 @@ type: text/vnd.tiddlywiki
 !! 0.2.0
 
 * added unit tests
+* fixed bugs
+** deleted the parseNumber utility function which overridden the standard TiddlyWiki one
 
 !! 0.1.0
 
