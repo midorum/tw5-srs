@@ -35,7 +35,6 @@ type: text/vnd.tiddlywiki
  groupStrategy=<<groupStrategy>>
  direction="$direction$"
  limit=<<limit>>
-log
 /><$action-setfield
  $tiddler=<<session>>
  $index="showAnswer"
@@ -165,8 +164,6 @@ $defer=<<answerLatency>>
 <$action-sendmessage
  $message="tm-srs-commit-answer"
  ref=<<session>>
- src="$(current-src)$"
- direction="$(current-direction)$"
  answer="$answer$"
 /><$action-setfield
  $tiddler=<<session>>
@@ -181,7 +178,11 @@ $defer=<<answerLatency>>
 />
 \end commit-answer-action
 \procedure end-session-action()
-<$action-deletetiddler
+<$action-sendmessage
+ $message="tm-srs-delete-session"
+ ref=<<session>>
+ answer="$answer$"
+/><$action-deletetiddler
  $tiddler=<<session>>
 /><$action-deletetiddler
  $tiddler=<<buttonsDisabledState>>

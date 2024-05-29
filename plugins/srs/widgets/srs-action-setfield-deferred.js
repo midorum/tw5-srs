@@ -14,7 +14,7 @@ Extended with 'defer' attribute.
 	"use strict";
 
 	var Widget = require("$:/core/modules/widgets/widget.js").widget;
-	const utils = require("$:/plugins/midorum/srs/modules/utils.js");
+	const utils = require("$:/plugins/midorum/srs/modules/utils.js").srsUtils;
 
 	var SrsSetFieldDefferedWidget = function (parseTreeNode, options) {
 		this.initialise(parseTreeNode, options);

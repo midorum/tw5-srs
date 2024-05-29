@@ -39,10 +39,16 @@ Adds listeners for SRS messages.
       messageHandler.createSession(params.ref, params.src, params.direction, params.limit, params.groupFilter, params.groupStrategy, params.log, params.idle, widget);
     });
 
+    $tw.rootWidget.addEventListener("tm-srs-delete-session", function (event) {
+      const widget = event.widget || $tw.rootWidget;
+      const params = event.paramObject || {};
+      messageHandler.deleteSession(params.ref, params.idle, widget);
+    });
+
     $tw.rootWidget.addEventListener("tm-srs-commit-answer", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.commitAnswer(params.ref, params.src, params.direction, params.answer, params.log, params.idle, widget);
+      messageHandler.commitAnswer(params.ref, params.answer, params.log, params.idle, widget);
     });
 
   };

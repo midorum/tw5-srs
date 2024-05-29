@@ -4,11 +4,12 @@ tags:
 title: Versions
 type: text/vnd.tiddlywiki
 
-!! 0.2.0
+!! 0.1.1
 
-* added unit tests
+* added `tm-srs-delete-session` message to delete current session from memory
+* added unit tests (`tiddlywiki --verbose --build test` command)
 * fixed bugs
-** deleted the parseNumber utility function which overridden the standard TiddlyWiki one
+** deleted the `parseNumber` utility function which overridden the standard TiddlyWiki one
 
 !! 0.1.0
 

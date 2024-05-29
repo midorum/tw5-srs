@@ -2,14 +2,13 @@
 title: test/service/createSession.js
 module-type: library
 
-Unit tests for createSession service.
+Unit tests for the createSession service.
 
 \*/
 
 const utils = require("test/utils");
 const messageHandler = require("$:/plugins/midorum/srs/modules/message-handler.js");
 const Logger = $tw.utils.Logger.prototype;
-
 
 describe("The createSession service", () => {
     var consoleSpy;
@@ -147,6 +146,7 @@ describe("The createSession service", () => {
         + " and schedule two tiddlers to learn"
         + " and set current tiddler"
         + " when direction is both", () => {
+            // console.warn(">>>");
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
             const ref = "$:/temp/srs/session";

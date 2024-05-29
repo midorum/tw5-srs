@@ -5,7 +5,7 @@ SiteSubtitle: TiddlyWiki plugin for organizing spaced repetitions
 DefaultTiddlers: Home
 config/Navigation/openLinkFromInsideRiver: above 
 config/TiddlerInfo/Mode: sticky
-palette: $:/palettes/Twilight
+palette: $:/midorum/palettes/Midark
 theme: $:/themes/tiddlywiki/vanilla
 themes/tiddlywiki/vanilla/metrics/bodyfontsize: 16px
 themes/tiddlywiki/vanilla/metrics/fontsize: 16px

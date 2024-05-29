@@ -2,7 +2,7 @@
 title: test/service/schedule.js
 module-type: library
 
-Unit tests for schedule service.
+Unit tests for the schedule service.
 
 \*/
 
@@ -59,15 +59,15 @@ describe("The schedule service", () => {
         expect(results[0]).toContain(expectedMessage);
     })
 
-    // it("should not create redundant tiddlers", () => {
-    //     const options = utils.setupWiki();
-    //     const ref = "not exist";
-    //     const direction = "forward";
-    //     const idle = false;
-    //     expect(messageHandler.schedule(ref, direction, idle, options.widget)).nothing();
-    //     expect(Logger.alert).toHaveBeenCalledTimes(0);
-    //     expect(options.widget.wiki.getTiddler(ref)).toBeUndefined();
-    // })
+    it("should not create redundant tiddlers", () => {
+        const options = utils.setupWiki();
+        const ref = "not exist";
+        const direction = "forward";
+        const idle = false;
+        expect(messageHandler.schedule(ref, direction, idle, options.widget)).nothing();
+        expect(Logger.alert).toHaveBeenCalledTimes(0);
+        expect(options.widget.wiki.getTiddler(ref)).toBeUndefined();
+    })
 
     it("should add the $:/srs/tags/scheduledForward tag to a tiddler"
         + " when direction argument is forward", () => {

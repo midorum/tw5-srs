@@ -20,7 +20,7 @@ Greatest time unit string representation
 	const MONTH = DAY * 30;
 	const YEAR = DAY * 365;
 
-	const utils = require("$:/plugins/midorum/srs/modules/utils.js");
+	const utils = require("$:/plugins/midorum/srs/modules/utils.js").srsUtils;
 
 	exports.gtu = function (source, operator, options) {
 		const results = [];

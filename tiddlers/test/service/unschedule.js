@@ -2,7 +2,7 @@
 title: test/service/unschedule.js
 module-type: library
 
-Unit tests for unschedule service.
+Unit tests for the unschedule service.
 
 \*/
 

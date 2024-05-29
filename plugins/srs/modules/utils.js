@@ -139,6 +139,7 @@ function getWikiUtils(wiki) {
     }
 
     return {
+      exists: () => !!tiddler.instance,
       getTitle: () => tiddler.title,
       getTiddlerTagsShallowCopy: getTiddlerTagsShallowCopy,
       getTiddlerField: getTiddlerField,
