@@ -53,22 +53,32 @@ Handling SRS messages.
       };
     }
 
-    function groupStrategyIsSatisfied(title) {
-      if (!_groupFilter) return true;
-      const titleGroup = _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+    function getGroupForTitle(title){
+      if (!_groupFilter) return undefined;
+      return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+    }
+
+    function searchGroup(groupForTitle){
+      if(!groupForTitle) return false;
+      return _groups.findIndex(group => utils.arraysAreEqual(group, groupForTitle)) !== -1;
+    }
+
+    function groupStrategyIsSatisfied(groupForTitle, groupIsFound) {
+      if(!groupForTitle) return true;
       if (_groupStrategy === "groupOnly") {
-        return titleGroup.length !== 0; // the tiddler belongs the group
+        return groupForTitle.length !== 0; // the tiddler belongs the group
       }
       if (_groupStrategy === "notInGroup") {
-        return titleGroup.length === 0; // the tiddler does not belong the group
+        return groupForTitle.length === 0; // the tiddler does not belong the group
       }
-      const groupIsFound = _groups.findIndex(group => utils.arraysAreEqual(group, titleGroup)) !== -1;
       if (_groupStrategy === "oneFromGroup") {
-        if (groupIsFound) return false; // this is the second found tiddler from the group
-        _groups.push(titleGroup);
-        return true;
+        return !groupIsFound; // this is the second found tiddler from the group
       }
       return true;
+    }
+
+    function pushGroup(groupForTitle, groupIsFound) {
+      if (_groupFilter && groupForTitle && !groupIsFound) _groups.push(groupForTitle);
     }
 
     function refill() {
@@ -78,16 +88,20 @@ Handling SRS messages.
       _newcomer = [];
       _context.wikiUtils.allTitlesWithTag(_src)
         .forEach(title => {
-          if (!groupStrategyIsSatisfied(title)) return;
+          const groupForTitle = getGroupForTitle(title);
+          const groupIsFound = searchGroup(groupForTitle);
+          if (!groupStrategyIsSatisfied(groupForTitle, groupIsFound)) return;
           const tiddler = _context.wikiUtils.withTiddler(title);
           if (_takeForward) {
             const forwardEntry = getForwardEntry(tiddler);
             if (forwardEntry) {
               if (!forwardEntry.due) {
                 _newcomer.push(forwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
                 return; // if we have taken forward we skip backward for same source
               } else if (forwardEntry.due <= now) {
                 _overdue.push(forwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
                 return; // if we have taken forward we skip backward for same source
               }
             }
@@ -97,8 +111,10 @@ Handling SRS messages.
             if (backwardEntry) {
               if (!backwardEntry.due) {
                 _newcomer.push(backwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
               } else if (backwardEntry.due <= now) {
                 _overdue.push(backwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
               }
             }
           }
