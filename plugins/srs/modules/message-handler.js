@@ -14,6 +14,7 @@ Handling SRS messages.
 
   const utils = require("$:/plugins/midorum/srs/modules/utils.js").srsUtils;
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
+  const SCHEDULING_CONFIGURATION_PREFIX = "$:/config/midorum/srs/scheduling";
 
   const Session = function (src, direction, groupFilter, groupStrategy, context) {
     const self = this;
@@ -304,7 +305,7 @@ Handling SRS messages.
     widget.wiki["srs-session"] = session;
     const first = session.getFirst(log);
     // const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
-    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction)) : undefined;
+    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction), context) : undefined;
     const data = {};
     data["src"] = src;
     data["direction"] = direction;
@@ -389,10 +390,10 @@ Handling SRS messages.
       logger.alert("Source tiddler not found: " + asked.src);
       return;
     }
-    const newDue = updateSrsFields(srcTiddler, asked.direction, answer);
+    const newDue = updateSrsFields(srcTiddler, asked.direction, answer, context);
     const next = session.acceptAnswerAndGetNext(asked.src, newDue, log);
     // const next = session_deprecated.acceptAnswerAndGetNext(asked.src, newDue, log);
-    const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction)) : undefined;
+    const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction), context) : undefined;
     const data = {};
     data["current-src"] = next.entry ? next.entry.src : undefined;
     data["current-direction"] = next.entry ? next.entry.direction : undefined;
@@ -410,13 +411,15 @@ Handling SRS messages.
 
   // all spaced repetition calcualtion logic is here
   // if currentStep is undefined, it should return default steps
-  function getNextSteps(currentStep) {
-    const minimalStep = 60000;// TODO get mimnimal step from settings
+  function getNextSteps(currentStep, context) {
+    const linearSchedulingConfiguration = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
+    const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/minimalStep").getTiddlerField("text"), 60000);
+    const factor = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/factor").getTiddlerField("text"), 2);
     const s = currentStep || minimalStep;
     return {
       reset: minimalStep,
       hold: s,
-      onward: s * 2 + 1 // TODO get factors from settings
+      onward: s * factor + 1 
     };
   }
 
@@ -427,16 +430,16 @@ Handling SRS messages.
     };
   }
 
-  function getNextStepsForTiddler(tiddler, srsFieldsNames) {
+  function getNextStepsForTiddler(tiddler, srsFieldsNames, context) {
     if (!tiddler || !srsFieldsNames) return undefined;
     const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
     const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
-    return (due && last) ? getNextSteps(due - last) : getNextSteps();
+    return (due && last) ? getNextSteps(due - last, context) : getNextSteps(undefined, context);
   }
 
   function updateSrsFields(tiddler, direction, answer, context) {
     const srsFieldsNames = getSrsFieldsNames(direction);
-    const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames);
+    const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames, context);
     const now = new Date().getTime();
     const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + nextSteps.hold
       : answer === utils.SRS_ANSWER_ONWARD ? now + nextSteps.onward

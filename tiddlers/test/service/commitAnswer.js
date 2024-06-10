@@ -77,7 +77,7 @@ describe("The commitAnswer service", () => {
     })
 
     it("should update SRS fields in source (asked) tiddler"
-        + " and move source tiddler to 'repaet' group"
+        + " and move source tiddler to 'repeat' group"
         + " and set next current tiddler"
         + " when answer is 'reset'", () => {
             const options = utils.setupWiki();
