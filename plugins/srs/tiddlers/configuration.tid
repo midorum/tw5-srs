@@ -4,4 +4,7 @@ tags:
 title: $:/plugins/midorum/srs/configuration
 type: text/vnd.tiddlywiki
 
-TBD
+\whitespace trim
+<div class="tc-control-panel">
+<<tabs "[all[shadows+tiddlers]tag[$:/tags/midorum/srs/Configuration]!has[draft.of]]" "$:/plugins/midorum/srs/ui/configuration/Scheduling">>
+</div>
