@@ -2,13 +2,18 @@ title: $:/plugins/midorum/srs/ui/configuration/Scheduling
 tags: $:/tags/midorum/srs/Configuration
 caption: Scheduling
 
+\define clearConfiguration(name)
+<$action-deletetiddler $tiddler="$name$" />
+\end
+
 !!! Scheduling algorithm: linear
 
 !!! Minimal Step
 
-A minimal repetition period (in milliseconds) for new and reset cards.
+A minimal repetition period (in seconds) for new and reset cards.
 
-<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/minimalStep" tag=input type="number"/>
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/minimalStep" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/linear/minimalStep">> > Reset </$button>
 
 !!! Factor
 
@@ -18,4 +23,5 @@ If repetition is too easy for you, increase the value.
 If you often have to reset cards to the beginning, decrease this number.
 The optimal range is from 2 to 5.
 
-<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/factor" tag=input type="number"/>
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/factor" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/linear/factor">> > Reset </$button>

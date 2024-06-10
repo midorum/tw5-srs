@@ -409,17 +409,25 @@ Handling SRS messages.
     context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.setOrCreateTiddlerData(data);
   };
 
+
+  function getSchedulingOptions(context) {
+    const linearSchedulingConfiguration = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
+    const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/minimalStep").getTiddlerField("text"), 60);
+    const factor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/factor").getTiddlerField("text")) || 2.0;
+    return {
+      minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
+      factor: factor >= 1 ? factor : 2.0
+    }
+  }
+
   // all spaced repetition calcualtion logic is here
   // if currentStep is undefined, it should return default steps
-  function getNextSteps(currentStep, context) {
-    const linearSchedulingConfiguration = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
-    const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/minimalStep").getTiddlerField("text"), 60000);
-    const factor = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/factor").getTiddlerField("text"), 2);
-    const s = currentStep || minimalStep;
+  function getNextSteps(currentStep, schedulingOptions) {
+    const s = currentStep || schedulingOptions.minimalStep;
     return {
-      reset: minimalStep,
+      reset: schedulingOptions.minimalStep,
       hold: s,
-      onward: s * factor + 1 
+      onward: s * schedulingOptions.factor + 1
     };
   }
 
@@ -432,9 +440,10 @@ Handling SRS messages.
 
   function getNextStepsForTiddler(tiddler, srsFieldsNames, context) {
     if (!tiddler || !srsFieldsNames) return undefined;
+    const schedulingOptions = getSchedulingOptions(context);
     const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
     const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
-    return (due && last) ? getNextSteps(due - last, context) : getNextSteps(undefined, context);
+    return (due && last) ? getNextSteps(due - last, schedulingOptions) : getNextSteps(undefined, schedulingOptions);
   }
 
   function updateSrsFields(tiddler, direction, answer, context) {

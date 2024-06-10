@@ -1,4 +1,4 @@
 title: $:/config/midorum/srs/scheduling/linear/
 
-minimalStep: 60000
-factor: 2
+minimalStep: 60
+factor: 2.0
