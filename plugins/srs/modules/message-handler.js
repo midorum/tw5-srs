@@ -466,8 +466,8 @@ Handling SRS messages.
     const srsFieldsNames = getSrsFieldsNames(direction);
     const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames, context);
     const now = new Date().getTime();
-    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + nextSteps.hold
-      : answer === utils.SRS_ANSWER_ONWARD ? now + nextSteps.onward * getRandomArbitrary(0.9, 1)
+    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + randomlyDecreaseValue(nextSteps.hold, nextSteps.reset)
+      : answer === utils.SRS_ANSWER_ONWARD ? now + randomlyDecreaseValue(nextSteps.onward, nextSteps.reset)
         : now + nextSteps.reset).getTime();
     storeSrsFields(tiddler, srsFieldsNames, newDue, now, context);
     return newDue;
@@ -486,6 +486,11 @@ Handling SRS messages.
 
   function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
+  }
+
+  function randomlyDecreaseValue(value, min) {
+    if (value <= min) return value;
+    return value * getRandomArbitrary(0.9, 1);
   }
 
 })();

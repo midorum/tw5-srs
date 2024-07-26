@@ -3,7 +3,7 @@
 	"title": "$:/plugins/midorum/srs",
 	"description": "TiddlyWiki plugin for organizing spaced repetitions",
 	"author": "midorum",
-	"version": "0.1.1-rc_0.1.2",
+	"version": "0.1.1-rc_0.1.2-randomly-decreasing-steps_0.0.1",
 	"core-version": ">=5.3.3",
 	"source": "https://github.com/midorum/tw5-srs",
 	"demo": "https://tw5-srs.tiddlyhost.com/",
