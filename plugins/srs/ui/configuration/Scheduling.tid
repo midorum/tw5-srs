@@ -6,22 +6,19 @@ caption: Scheduling
 <$action-deletetiddler $tiddler="$name$" />
 \end
 
-!!! Scheduling algorithm: linear
+!!! Scheduling algorithm
 
-!!! Minimal Step
+<$select tiddler="$:/config/midorum/srs/scheduling/strategy">
+    <option value="linear">Linear</option>
+    <option value="two-factor-linear">Two Factor Linear</option>
+</$select>
 
-A minimal repetition period (in seconds) for new and reset cards.
+<$reveal type="match" stateTitle="$:/config/midorum/srs/scheduling/strategy" text="linear" >
 
-<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/minimalStep" tag="input" type="number"/>
-<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/linear/minimalStep">> > Reset </$button>
+{{$:/plugins/midorum/srs/templates/configuration/strategy/linear}}
 
-!!! Factor
+</$reveal><$reveal type="match" stateTitle="$:/config/midorum/srs/scheduling/strategy" text="two-factor-linear" >
 
-The multiplier by which the next step is greater than the previous one.
-A higher number gives a steeper learning curve.
-If repetition is too easy for you, increase the value.
-If you often have to reset cards to the beginning, decrease this number.
-The optimal range is from 2 to 5.
+{{$:/plugins/midorum/srs/templates/configuration/strategy/two-factor-linear}}
 
-<$edit-text tiddler="$:/config/midorum/srs/scheduling/linear/factor" tag="input" type="number"/>
-<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/linear/factor">> > Reset </$button>
+</$reveal>

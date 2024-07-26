@@ -1,0 +1,6 @@
+title: $:/config/midorum/srs/scheduling/two-factor-linear/
+
+minimalStep: 60
+short-factor: 10.0
+long-factor-ratio: 2.0
+pivot: 86400

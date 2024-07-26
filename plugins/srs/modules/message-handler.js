@@ -425,25 +425,55 @@ Handling SRS messages.
     context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.setOrCreateTiddlerData(data);
   };
 
-
-  function getSchedulingOptions(context) {
-    const linearSchedulingConfiguration = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
-    const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/minimalStep").getTiddlerField("text"), 60);
-    const factor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(linearSchedulingConfiguration + "/factor").getTiddlerField("text")) || 2.0;
-    return {
-      minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
-      factor: factor >= 1 ? factor : 2.0
-    }
-  }
-
   // all spaced repetition calcualtion logic is here
   // if currentStep is undefined, it should return default steps
-  function getNextSteps(currentStep, schedulingOptions) {
+  function getNextSteps(currentStep, context) {
+    const strategy = context.wikiUtils.withTiddler(SCHEDULING_CONFIGURATION_PREFIX + "/strategy").getTiddlerField("text");
+    if (strategy === "linear") return getLinearStrategyNextSteps(currentStep, context);
+    if (strategy === "two-factor-linear") return getTwoFactorLinearStrategyNextSteps(currentStep, context);
+    throw new Error("uknown strategy: " + strategy);
+  }
+
+  function getLinearStrategyNextSteps(currentStep, context) {
+    function getSchedulingOptions(context) {
+      const strategyConfigurationPrefix = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
+      const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/minimalStep").getTiddlerField("text"), 60);
+      const factor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/factor").getTiddlerField("text")) || 2.0;
+      return {
+        minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
+        factor: factor >= 1 ? factor : 2.0
+      }
+    }
+    const schedulingOptions = getSchedulingOptions(context);
     const s = currentStep || schedulingOptions.minimalStep;
     return {
       reset: schedulingOptions.minimalStep,
       hold: s,
       onward: s * schedulingOptions.factor + 1
+    };
+  }
+
+  function getTwoFactorLinearStrategyNextSteps(currentStep, context) {
+    function getSchedulingOptions(context) {
+      const strategyConfigurationPrefix = SCHEDULING_CONFIGURATION_PREFIX + "/two-factor-linear";
+      const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/minimalStep").getTiddlerField("text"), 60);
+      const shortFactor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/short-factor").getTiddlerField("text")) || 10.0;
+      const longFactorRatio = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/long-factor-ratio").getTiddlerField("text")) || 2.0;
+      const pivot = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/pivot").getTiddlerField("text"), 86400);
+      const sf = shortFactor >= 1 ? shortFactor : 10.0;
+      return {
+        minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
+        shortFactor: sf,
+        longFactorRatio: longFactorRatio >= 1 && longFactorRatio <= sf ? longFactorRatio : sf <= 2.0 ? 1.0 : 2.0,
+        pivot: (pivot >= 1 ? pivot : 86400) * 1000
+      }
+    }
+    const schedulingOptions = getSchedulingOptions(context);
+    const s = currentStep || schedulingOptions.minimalStep;
+    return {
+      reset: schedulingOptions.minimalStep,
+      hold: s,
+      onward: (s < schedulingOptions.pivot ? s * schedulingOptions.shortFactor : s * schedulingOptions.shortFactor / schedulingOptions.longFactorRatio) + 1
     };
   }
 
@@ -456,10 +486,9 @@ Handling SRS messages.
 
   function getNextStepsForTiddler(tiddler, srsFieldsNames, context) {
     if (!tiddler || !srsFieldsNames) return undefined;
-    const schedulingOptions = getSchedulingOptions(context);
     const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
     const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
-    return (due && last) ? getNextSteps(due - last, schedulingOptions) : getNextSteps(undefined, schedulingOptions);
+    return (due && last) ? getNextSteps(due - last, context) : getNextSteps(undefined, context);
   }
 
   function updateSrsFields(tiddler, direction, answer, context) {

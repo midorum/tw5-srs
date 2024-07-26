@@ -25,6 +25,19 @@
 				},
 				"type": "application/javascript"
 			}
+		},
+		{
+			"path": "./strategy",
+			"filesRegExp": "^.*$",
+			"isTiddlerFile": true,
+			"fields": {
+				"tags": "$:/tags/test-spec",
+				"title": {
+					"source": "filename",
+					"prefix": "test/strategy/"
+				},
+				"type": "application/javascript"
+			}
 		}
 	]
 }
