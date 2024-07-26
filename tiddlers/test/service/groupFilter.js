@@ -39,8 +39,9 @@ describe("The createSession service", () => {
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, groupTag, options, context);
                 const askedMap = {};
-            // consoleSpy.and.callThrough();
-            loggerSpy.and.callThrough();
+                options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
+                // consoleSpy.and.callThrough();
+                loggerSpy.and.callThrough();
                 expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 const asked1 = verifySession(ref, src, direction, 1, 2, 0, options);

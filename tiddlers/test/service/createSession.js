@@ -92,6 +92,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
@@ -126,6 +127,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
@@ -161,6 +163,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
