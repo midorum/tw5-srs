@@ -4,6 +4,14 @@ tags:
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.2
+
+* added two factor linear sceduling strategy
+* added randomly decreasing hold and onward steps
+* removed current asked item from repeat counter
+* added basic scheduling configuration
+* fixed group filtering to retrieve not only first matching for each group
+
 !! 0.1.1
 
 * added `tm-srs-delete-session` message to delete current session from memory

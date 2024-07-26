@@ -34,7 +34,8 @@ describe("The two-factor-linear strategy", () => {
             const scheduledBacwardTitle = "scheduledBackward";
             const lastTime = 1716874063993;
             const currentStep = 60000;
-            const expectedNextTime = currentStep * 10.0 + 1; // default factors
+            const expectedNextTimeMin = currentStep * 10.0 * 0.9 + 1; // default factors
+            const expectedNextTimeMax = currentStep * 10.0 + 1; // default factors
             const scheduledForwardTemplate = {
                 title: scheduledForwardTitle,
                 tags: [srcTag, context.tags.scheduledForward],
@@ -54,11 +55,11 @@ describe("The two-factor-linear strategy", () => {
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "two-factor-linear" });
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
-            verifyAskedTiddler(firstAsked, templateMap, expectedNextTime, options);
+            verifyAskedTiddler(firstAsked, templateMap, expectedNextTimeMin, expectedNextTimeMax, options);
         })
 
     it("should increase the current step by a short factor and decrease by a long factor ration when it is equals or greater than the pivot value"
@@ -75,7 +76,8 @@ describe("The two-factor-linear strategy", () => {
             const scheduledBacwardTitle = "scheduledBackward";
             const lastTime = 1716874063993;
             const currentStep = 1000 * 60 * 60 * 24; // default pivot value
-            const expectedNextTime = currentStep * 10.0 / 2.0 + 1; // default factors
+            const expectedNextTimeMin = currentStep * 10.0 / 2.0 * 0.9 + 1; // default factors
+            const expectedNextTimeMax = currentStep * 10.0 / 2.0 + 1; // default factors
             const scheduledForwardTemplate = {
                 title: scheduledForwardTitle,
                 tags: [srcTag, context.tags.scheduledForward],
@@ -95,16 +97,16 @@ describe("The two-factor-linear strategy", () => {
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "two-factor-linear" });
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
-            verifyAskedTiddler(firstAsked, templateMap, expectedNextTime, options);
+            verifyAskedTiddler(firstAsked, templateMap, expectedNextTimeMin, expectedNextTimeMax, options);
         })
 
 });
 
-function verifyAskedTiddler(asked, templateMap, expectedNextTime, options) {
+function verifyAskedTiddler(asked, templateMap, expectedNextTimeMin, expectedNextTimeMax, options) {
     const askedTiddlerInstance = options.widget.wiki.getTiddler(asked.src);
     // console.warn("askedTiddlerInstance", askedTiddlerInstance);
     const originalTemplate = templateMap[asked.src];
@@ -114,13 +116,17 @@ function verifyAskedTiddler(asked, templateMap, expectedNextTime, options) {
         expect(askedTiddlerInstance.fields["srs-forward-last"]).toBeDefined();
         expect(askedTiddlerInstance.fields["srs-forward-due"]).toBeGreaterThan(originalTemplate["srs-forward-due"]);
         expect(askedTiddlerInstance.fields["srs-forward-last"]).toBeGreaterThan(originalTemplate["srs-forward-last"]);
-        expect(askedTiddlerInstance.fields["srs-forward-due"] - askedTiddlerInstance.fields["srs-forward-last"]).toEqual(expectedNextTime);
+        const step = askedTiddlerInstance.fields["srs-forward-due"] - askedTiddlerInstance.fields["srs-forward-last"];
+        expect(step).toBeGreaterThan(expectedNextTimeMin);
+        expect(step).toBeLessThan(expectedNextTimeMax);
     } else {
         expect(askedTiddlerInstance.fields["srs-backward-due"]).toBeDefined();
         expect(askedTiddlerInstance.fields["srs-backward-last"]).toBeDefined();
         expect(askedTiddlerInstance.fields["srs-backward-due"]).toBeGreaterThan(originalTemplate["srs-backward-due"]);
         expect(askedTiddlerInstance.fields["srs-backward-last"]).toBeGreaterThan(originalTemplate["srs-backward-last"]);
-        expect(askedTiddlerInstance.fields["srs-backward-due"] - askedTiddlerInstance.fields["srs-backward-last"]).toEqual(expectedNextTime);
+        const step = askedTiddlerInstance.fields["srs-backward-due"] - askedTiddlerInstance.fields["srs-backward-last"];
+        expect(step).toBeGreaterThan(expectedNextTimeMin);
+        expect(step).toBeLessThan(expectedNextTimeMax);
     }
 }
 
