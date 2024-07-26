@@ -43,13 +43,13 @@ describe("The createSession service", () => {
             loggerSpy.and.callThrough();
                 expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
-                const asked1 = verifySession(ref, src, direction, 1, 2, 0, options);
+                const asked1 = verifySession(ref, src, direction, 0, 2, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked1, sourceTiddlers, askedMap);
                 expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
-                const asked2 = verifySession(ref, src, direction, 2, 1, 0, options);
+                const asked2 = verifySession(ref, src, direction, 1, 1, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked2, sourceTiddlers, askedMap);
                 expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
-                const asked3 = verifySession(ref, src, direction, 3, 0, 0, options);
+                const asked3 = verifySession(ref, src, direction, 2, 0, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked3, sourceTiddlers, askedMap);
                 expect(askedMap["group1"]).toBeDefined();
                 expect(askedMap["group2"]).toBeDefined();

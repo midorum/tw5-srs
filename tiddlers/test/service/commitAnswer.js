@@ -99,12 +99,12 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, options);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 2, 0, 0, options);
+            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
         })
 
     it("should update SRS fields in source (asked) tiddler"
@@ -138,14 +138,14 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked",firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, options);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
             // console.warn("nextAskedTemplate",nextAskedTemplate)
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 2, 0, 0, options);
+            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
         })
 
 });
