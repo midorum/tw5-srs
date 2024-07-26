@@ -54,18 +54,18 @@ Handling SRS messages.
       };
     }
 
-    function getGroupForTitle(title){
+    function getGroupForTitle(title) {
       if (!_groupFilter) return undefined;
       return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
     }
 
-    function searchGroup(groupForTitle){
-      if(!groupForTitle) return false;
+    function searchGroup(groupForTitle) {
+      if (!groupForTitle) return false;
       return _groups.findIndex(group => utils.arraysAreEqual(group, groupForTitle)) !== -1;
     }
 
     function groupStrategyIsSatisfied(groupForTitle, groupIsFound) {
-      if(!groupForTitle) return true;
+      if (!groupForTitle) return true;
       if (_groupStrategy === "groupOnly") {
         return groupForTitle.length !== 0; // the tiddler belongs the group
       }
@@ -466,8 +466,8 @@ Handling SRS messages.
     const srsFieldsNames = getSrsFieldsNames(direction);
     const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames, context);
     const now = new Date().getTime();
-    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + nextSteps.hold
-      : answer === utils.SRS_ANSWER_ONWARD ? now + nextSteps.onward
+    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + randomlyDecreaseValue(nextSteps.hold, nextSteps.reset)
+      : answer === utils.SRS_ANSWER_ONWARD ? now + randomlyDecreaseValue(nextSteps.onward, nextSteps.reset)
         : now + nextSteps.reset).getTime();
     storeSrsFields(tiddler, srsFieldsNames, newDue, now, context);
     return newDue;
@@ -482,6 +482,15 @@ Handling SRS messages.
 
   function calculateEstimatedEndTime(counters) {
     return (counters.repeat + counters.overdue + counters.newcomer) * 10000 + new Date().getTime();
+  }
+
+  function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function randomlyDecreaseValue(value, min) {
+    if (value <= min) return value;
+    return value * getRandomArbitrary(0.9, 1);
   }
 
 })();
