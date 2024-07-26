@@ -77,7 +77,7 @@ describe("The commitAnswer service", () => {
     })
 
     it("should update SRS fields in source (asked) tiddler"
-        + " and move source tiddler to 'repaet' group"
+        + " and move source tiddler to 'repeat' group"
         + " and set next current tiddler"
         + " when answer is 'reset'", () => {
             const options = utils.setupWiki();
@@ -97,20 +97,21 @@ describe("The commitAnswer service", () => {
             templateMap[scheduledBackwardTemplate.title] = scheduledBackwardTemplate;
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, options);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 2, 0, 0, options);
+            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
         })
 
     it("should update SRS fields in source (asked) tiddler"
         + " and move source tiddler to 'onward' group"
         + " and set next current tiddler"
-        + " when answer is 'reset'", () => {
+        + " when answer is 'onward'", () => {
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
             const ref = "$:/temp/srs/session";
@@ -136,16 +137,17 @@ describe("The commitAnswer service", () => {
             templateMap[scheduledBackwardTemplate.title] = scheduledBackwardTemplate;
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             loggerSpy.and.callThrough();
             expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
-            const firstAsked = verifySession(ref, srcTag, direction, undefined, 1, 1, 0, options);
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked",firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, options);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
             // console.warn("nextAskedTemplate",nextAskedTemplate)
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 2, 0, 0, options);
+            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
         })
 
 });

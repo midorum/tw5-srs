@@ -1,0 +1,24 @@
+title: $:/plugins/midorum/srs/ui/configuration/Scheduling
+tags: $:/tags/midorum/srs/Configuration
+caption: Scheduling
+
+\define clearConfiguration(name)
+<$action-deletetiddler $tiddler="$name$" />
+\end
+
+!!! Scheduling algorithm
+
+<$select tiddler="$:/config/midorum/srs/scheduling/strategy">
+    <option value="linear">Linear</option>
+    <option value="two-factor-linear">Two Factor Linear</option>
+</$select>
+
+<$reveal type="match" stateTitle="$:/config/midorum/srs/scheduling/strategy" text="linear" >
+
+{{$:/plugins/midorum/srs/templates/configuration/strategy/linear}}
+
+</$reveal><$reveal type="match" stateTitle="$:/config/midorum/srs/scheduling/strategy" text="two-factor-linear" >
+
+{{$:/plugins/midorum/srs/templates/configuration/strategy/two-factor-linear}}
+
+</$reveal>

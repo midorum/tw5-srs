@@ -92,6 +92,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
@@ -103,7 +104,7 @@ describe("The createSession service", () => {
             expect(sessionData.direction).toEqual(direction);
             expect(sessionData["current-src"]).toEqual(scheduledForwardTemplate.title);
             expect(sessionData["current-direction"]).toEqual(direction);
-            expect(sessionData["counter-repeat"]).toEqual(1);
+            expect(sessionData["counter-repeat"]).toEqual(0);
             expect(sessionData["counter-overdue"]).toEqual(0);
             expect(sessionData["counter-newcomer"]).toEqual(0);
         })
@@ -126,6 +127,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
@@ -137,7 +139,7 @@ describe("The createSession service", () => {
             expect(sessionData.direction).toEqual(direction);
             expect(sessionData["current-src"]).toEqual(scheduledBackwardTemplate.title);
             expect(sessionData["current-direction"]).toEqual(direction);
-            expect(sessionData["counter-repeat"]).toEqual(1);
+            expect(sessionData["counter-repeat"]).toEqual(0);
             expect(sessionData["counter-overdue"]).toEqual(0);
             expect(sessionData["counter-newcomer"]).toEqual(0);
         })
@@ -161,6 +163,7 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
             expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
@@ -171,7 +174,7 @@ describe("The createSession service", () => {
             expect(sessionData.src).toEqual(src);
             expect(sessionData.direction).toEqual(direction);
             expect(sessionData["current-src"]).toEqual(scheduledBackwardTemplate.title);
-            expect(sessionData["counter-repeat"]).toEqual(1);
+            expect(sessionData["counter-repeat"]).toEqual(0);
             expect(sessionData["counter-overdue"]).toEqual(0);
             expect(sessionData["counter-newcomer"]).toEqual(1);
         })

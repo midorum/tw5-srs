@@ -14,6 +14,7 @@ Handling SRS messages.
 
   const utils = require("$:/plugins/midorum/srs/modules/utils.js").srsUtils;
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
+  const SCHEDULING_CONFIGURATION_PREFIX = "$:/config/midorum/srs/scheduling";
 
   const Session = function (src, direction, groupFilter, groupStrategy, context) {
     const self = this;
@@ -53,22 +54,32 @@ Handling SRS messages.
       };
     }
 
-    function groupStrategyIsSatisfied(title) {
-      if (!_groupFilter) return true;
-      const titleGroup = _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+    function getGroupForTitle(title) {
+      if (!_groupFilter) return undefined;
+      return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+    }
+
+    function searchGroup(groupForTitle) {
+      if (!groupForTitle) return false;
+      return _groups.findIndex(group => utils.arraysAreEqual(group, groupForTitle)) !== -1;
+    }
+
+    function groupStrategyIsSatisfied(groupForTitle, groupIsFound) {
+      if (!groupForTitle) return true;
       if (_groupStrategy === "groupOnly") {
-        return titleGroup.length !== 0; // the tiddler belongs the group
+        return groupForTitle.length !== 0; // the tiddler belongs the group
       }
       if (_groupStrategy === "notInGroup") {
-        return titleGroup.length === 0; // the tiddler does not belong the group
+        return groupForTitle.length === 0; // the tiddler does not belong the group
       }
-      const groupIsFound = _groups.findIndex(group => utils.arraysAreEqual(group, titleGroup)) !== -1;
       if (_groupStrategy === "oneFromGroup") {
-        if (groupIsFound) return false; // this is the second found tiddler from the group
-        _groups.push(titleGroup);
-        return true;
+        return !groupIsFound; // this is the second found tiddler from the group
       }
       return true;
+    }
+
+    function pushGroup(groupForTitle, groupIsFound) {
+      if (_groupFilter && groupForTitle && !groupIsFound) _groups.push(groupForTitle);
     }
 
     function refill() {
@@ -78,16 +89,20 @@ Handling SRS messages.
       _newcomer = [];
       _context.wikiUtils.allTitlesWithTag(_src)
         .forEach(title => {
-          if (!groupStrategyIsSatisfied(title)) return;
+          const groupForTitle = getGroupForTitle(title);
+          const groupIsFound = searchGroup(groupForTitle);
+          if (!groupStrategyIsSatisfied(groupForTitle, groupIsFound)) return;
           const tiddler = _context.wikiUtils.withTiddler(title);
           if (_takeForward) {
             const forwardEntry = getForwardEntry(tiddler);
             if (forwardEntry) {
               if (!forwardEntry.due) {
                 _newcomer.push(forwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
                 return; // if we have taken forward we skip backward for same source
               } else if (forwardEntry.due <= now) {
                 _overdue.push(forwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
                 return; // if we have taken forward we skip backward for same source
               }
             }
@@ -97,8 +112,10 @@ Handling SRS messages.
             if (backwardEntry) {
               if (!backwardEntry.due) {
                 _newcomer.push(backwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
               } else if (backwardEntry.due <= now) {
                 _overdue.push(backwardEntry);
+                pushGroup(groupForTitle, groupIsFound);
               }
             }
           }
@@ -134,7 +151,7 @@ Handling SRS messages.
 
     function counters() {
       return {
-        repeat: _repeat.length + 1,
+        repeat: _repeat.length,
         overdue: _overdue.length,
         newcomer: _newcomer.length
       };
@@ -304,7 +321,7 @@ Handling SRS messages.
     widget.wiki["srs-session"] = session;
     const first = session.getFirst(log);
     // const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
-    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction)) : undefined;
+    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction), context) : undefined;
     const data = {};
     data["src"] = src;
     data["direction"] = direction;
@@ -389,10 +406,10 @@ Handling SRS messages.
       logger.alert("Source tiddler not found: " + asked.src);
       return;
     }
-    const newDue = updateSrsFields(srcTiddler, asked.direction, answer);
+    const newDue = updateSrsFields(srcTiddler, asked.direction, answer, context);
     const next = session.acceptAnswerAndGetNext(asked.src, newDue, log);
     // const next = session_deprecated.acceptAnswerAndGetNext(asked.src, newDue, log);
-    const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction)) : undefined;
+    const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction), context) : undefined;
     const data = {};
     data["current-src"] = next.entry ? next.entry.src : undefined;
     data["current-direction"] = next.entry ? next.entry.direction : undefined;
@@ -410,13 +427,53 @@ Handling SRS messages.
 
   // all spaced repetition calcualtion logic is here
   // if currentStep is undefined, it should return default steps
-  function getNextSteps(currentStep) {
-    const minimalStep = 60000;// TODO get mimnimal step from settings
-    const s = currentStep || minimalStep;
+  function getNextSteps(currentStep, context) {
+    const strategy = context.wikiUtils.withTiddler(SCHEDULING_CONFIGURATION_PREFIX + "/strategy").getTiddlerField("text");
+    if (strategy === "linear") return getLinearStrategyNextSteps(currentStep, context);
+    if (strategy === "two-factor-linear") return getTwoFactorLinearStrategyNextSteps(currentStep, context);
+    throw new Error("uknown strategy: " + strategy);
+  }
+
+  function getLinearStrategyNextSteps(currentStep, context) {
+    function getSchedulingOptions(context) {
+      const strategyConfigurationPrefix = SCHEDULING_CONFIGURATION_PREFIX + "/linear";
+      const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/minimalStep").getTiddlerField("text"), 60);
+      const factor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/factor").getTiddlerField("text")) || 2.0;
+      return {
+        minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
+        factor: factor >= 1 ? factor : 2.0
+      }
+    }
+    const schedulingOptions = getSchedulingOptions(context);
+    const s = currentStep || schedulingOptions.minimalStep;
     return {
-      reset: minimalStep,
+      reset: schedulingOptions.minimalStep,
       hold: s,
-      onward: s * 2 + 1 // TODO get factors from settings
+      onward: s * schedulingOptions.factor + 1
+    };
+  }
+
+  function getTwoFactorLinearStrategyNextSteps(currentStep, context) {
+    function getSchedulingOptions(context) {
+      const strategyConfigurationPrefix = SCHEDULING_CONFIGURATION_PREFIX + "/two-factor-linear";
+      const minimalStep = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/minimalStep").getTiddlerField("text"), 60);
+      const shortFactor = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/short-factor").getTiddlerField("text")) || 10.0;
+      const longFactorRatio = $tw.utils.parseNumber(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/long-factor-ratio").getTiddlerField("text")) || 2.0;
+      const pivot = utils.parseInteger(context.wikiUtils.withTiddler(strategyConfigurationPrefix + "/pivot").getTiddlerField("text"), 86400);
+      const sf = shortFactor >= 1 ? shortFactor : 10.0;
+      return {
+        minimalStep: (minimalStep >= 1 ? minimalStep : 60) * 1000,
+        shortFactor: sf,
+        longFactorRatio: longFactorRatio >= 1 && longFactorRatio <= sf ? longFactorRatio : sf <= 2.0 ? 1.0 : 2.0,
+        pivot: (pivot >= 1 ? pivot : 86400) * 1000
+      }
+    }
+    const schedulingOptions = getSchedulingOptions(context);
+    const s = currentStep || schedulingOptions.minimalStep;
+    return {
+      reset: schedulingOptions.minimalStep,
+      hold: s,
+      onward: (s < schedulingOptions.pivot ? s * schedulingOptions.shortFactor : s * schedulingOptions.shortFactor / schedulingOptions.longFactorRatio) + 1
     };
   }
 
@@ -427,19 +484,19 @@ Handling SRS messages.
     };
   }
 
-  function getNextStepsForTiddler(tiddler, srsFieldsNames) {
+  function getNextStepsForTiddler(tiddler, srsFieldsNames, context) {
     if (!tiddler || !srsFieldsNames) return undefined;
     const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
     const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
-    return (due && last) ? getNextSteps(due - last) : getNextSteps();
+    return (due && last) ? getNextSteps(due - last, context) : getNextSteps(undefined, context);
   }
 
   function updateSrsFields(tiddler, direction, answer, context) {
     const srsFieldsNames = getSrsFieldsNames(direction);
-    const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames);
+    const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames, context);
     const now = new Date().getTime();
-    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + nextSteps.hold
-      : answer === utils.SRS_ANSWER_ONWARD ? now + nextSteps.onward
+    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + randomlyDecreaseValue(nextSteps.hold, nextSteps.reset)
+      : answer === utils.SRS_ANSWER_ONWARD ? now + randomlyDecreaseValue(nextSteps.onward, nextSteps.reset)
         : now + nextSteps.reset).getTime();
     storeSrsFields(tiddler, srsFieldsNames, newDue, now, context);
     return newDue;
@@ -454,6 +511,15 @@ Handling SRS messages.
 
   function calculateEstimatedEndTime(counters) {
     return (counters.repeat + counters.overdue + counters.newcomer) * 10000 + new Date().getTime();
+  }
+
+  function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function randomlyDecreaseValue(value, min) {
+    if (value <= min) return value;
+    return value * getRandomArbitrary(0.9, 1);
   }
 
 })();

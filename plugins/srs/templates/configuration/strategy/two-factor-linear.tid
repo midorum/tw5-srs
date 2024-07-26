@@ -1,0 +1,34 @@
+title: $:/plugins/midorum/srs/templates/configuration/strategy/two-factor-linear
+
+!!! Minimal Step
+
+A minimal repetition period (in seconds) for new and reset cards.
+
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/two-factor-linear/minimalStep" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/two-factor-linear/minimalStep">> > Reset </$button>
+
+!!! Short Factor
+
+The multiplier by which the next step is greater than the previous one.
+A higher number gives a steeper learning curve.
+If repetition is too easy for you, increase the value.
+If you often have to reset cards to the beginning, decrease this number.
+
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/two-factor-linear/short-factor" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/two-factor-linear/short-factor">> > Reset </$button>
+
+!!! Long Factor Ratio
+
+The divisor is applied when the current step is greater than the pivot value.
+A higher number gives a flatter learning curve when the card is in long-term memory.
+
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/two-factor-linear/long-factor-ratio" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/two-factor-linear/long-factor-ratio">> > Reset </$button>
+
+!!! Pivot Value
+
+The value of a repetition period (in seconds) after which the long factor ratio is applied.
+It equals to 1 day by default.
+
+<$edit-text tiddler="$:/config/midorum/srs/scheduling/two-factor-linear/pivot" tag="input" type="number"/>
+<$button actions=<<clearConfiguration "$:/config/midorum/srs/scheduling/two-factor-linear/pivot">> > Reset </$button>
