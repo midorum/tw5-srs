@@ -151,7 +151,7 @@ Handling SRS messages.
 
     function counters() {
       return {
-        repeat: _repeat.length + 1,
+        repeat: _repeat.length,
         overdue: _overdue.length,
         newcomer: _newcomer.length
       };
