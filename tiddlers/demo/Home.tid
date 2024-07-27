@@ -1,8 +1,12 @@
-created: 20240509123123144
-modified: 20240526161300622
-tags: 
 title: Home
 type: text/vnd.tiddlywiki
+
+! {{$:/plugins/midorum/srs!!description}}
+
+|Plugin version |{{$:/plugins/midorum/srs!!version}} |
+|Core version |{{$:/plugins/midorum/srs!!core-version}} |
+|Sources |{{$:/plugins/midorum/srs!!source}} |
+|Demo page |{{$:/plugins/midorum/srs!!demo}} |
 
 !! Introduction
 
@@ -29,7 +33,5 @@ The plugin is not ready for use! Please do not import it!
 Currently, the SRS plugin supports only one session instance simultaneously. If you create more than one session, the plugin will work with the last one.
 
 !! Plugin Versions
-
-Current plugin version: 0.1.2
 
 You can see all version changes [[here|Versions]].
