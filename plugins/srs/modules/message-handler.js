@@ -16,7 +16,7 @@ Handling SRS messages.
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
   const SCHEDULING_CONFIGURATION_PREFIX = "$:/config/midorum/srs/scheduling";
 
-  const Session = function (src, direction, groupFilter, groupStrategy, context) {
+  const Session = function (src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, context) {
     const self = this;
     const _comparator = (a, b) => a.due - b.due;
     const _now = () => new Date().getTime();
@@ -29,6 +29,8 @@ Handling SRS messages.
     var _takeBackward = direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION;
     var _groupFilter = groupFilter && groupStrategy ? groupFilter : undefined;
     var _groupStrategy = groupFilter && groupStrategy ? groupStrategy : undefined;
+    var _groupListFilter = groupListFilter && groupFilter && groupStrategy ? groupListFilter : undefined;
+    var _groupLimit = groupLimit && groupListFilter && groupFilter && groupStrategy ? groupLimit : undefined;
     var _ttl;
     var _repeat = [];
     var _overdue = [];
@@ -54,39 +56,45 @@ Handling SRS messages.
       };
     }
 
-    function getGroupForTitle(title) {
-      if (!_groupFilter) return undefined;
-      return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
-    }
-
-    function searchGroup(groupForTitle) {
-      if (!groupForTitle) return false;
-      return _groups.findIndex(group => utils.arraysAreEqual(group, groupForTitle)) !== -1;
-    }
-
-    function groupStrategyIsSatisfied(groupForTitle, groupIsFound) {
-      if (!groupForTitle) return true;
-      if (_groupStrategy === "groupOnly") {
-        return groupForTitle.length !== 0; // the tiddler belongs the group
-      }
-      if (_groupStrategy === "notInGroup") {
-        return groupForTitle.length === 0; // the tiddler does not belong the group
-      }
-      if (_groupStrategy === "oneFromGroup") {
-        return !groupIsFound; // this is the second found tiddler from the group
-      }
-      return true;
-    }
-
-    function pushGroup(groupForTitle, groupIsFound) {
-      if (_groupFilter && groupForTitle && !groupIsFound) _groups.push(groupForTitle);
-    }
-
     function refill() {
       const now = _now();
       _repeat = [];
       _overdue = [];
       _newcomer = [];
+      if (_groupStrategy === "nFromGroup") {
+        checkGroupsOverEachItem(now); // groups may contain the item
+      } else {
+        checkGroupsUnderEachItem(now); // the item may contain groups
+      }
+      _overdue.sort(_comparator);
+      _ttl = now + 600000; // 10 minutes
+    }
+
+    function checkGroupsUnderEachItem(now) {
+      const getGroupForTitle = (title) => {
+        if (!_groupFilter) return undefined;
+        return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<currentTiddler>", "[" + title + "]"));
+      }
+      const searchGroup = (groupForTitle) => {
+        if (!groupForTitle) return false;
+        return _groups.findIndex(group => utils.arraysAreEqual(group, groupForTitle)) !== -1;
+      }
+      const pushGroup = (groupForTitle, groupIsFound) => {
+        if (_groupFilter && groupForTitle && !groupIsFound) _groups.push(groupForTitle);
+      }
+      const groupStrategyIsSatisfied = (groupForTitle, groupIsFound) => {
+        if (!groupForTitle) return true;
+        if (_groupStrategy === "groupOnly") {
+          return groupForTitle.length !== 0; // the tiddler belongs the group
+        }
+        if (_groupStrategy === "notInGroup") {
+          return groupForTitle.length === 0; // the tiddler does not belong the group
+        }
+        if (_groupStrategy === "oneFromGroup") {
+          return !groupIsFound; // this is the second found tiddler from the group
+        }
+        return true;
+      }
       _context.wikiUtils.allTitlesWithTag(_src)
         .forEach(title => {
           const groupForTitle = getGroupForTitle(title);
@@ -120,8 +128,55 @@ Handling SRS messages.
             }
           }
         });
-      _overdue.sort(_comparator);
-      _ttl = now + 600000; // 10 minutes
+    }
+
+    function checkGroupsOverEachItem(now) {
+      const getGroupList = () => {
+        if (!_groupListFilter) return undefined;
+        return _context.wikiUtils.filterTiddlers(_groupListFilter);
+      }
+      const groupContainsTitle = (group, title) => {
+        if (!_groupFilter) return undefined;
+        return _context.wikiUtils.filterTiddlers(_groupFilter.replaceAll("<groupTitle>", "[" + group + "]").replaceAll("<currentTiddler>", "[" + title + "]"));
+      }
+      const groupList = getGroupList();
+      if (!groupList.length) throw "group list is empty"
+      const groupMap = {};
+      _context.wikiUtils.allTitlesWithTag(_src)
+        .forEach(title => {
+          for (const group of groupList) {
+            if (groupMap[group] && groupMap[group] >= _groupLimit) continue;
+            const titleIsInGroup = groupContainsTitle(group, title);
+            if (!titleIsInGroup.length) continue;
+            const tiddler = _context.wikiUtils.withTiddler(title);
+            if (_takeForward) {
+              const forwardEntry = getForwardEntry(tiddler);
+              if (forwardEntry) {
+                if (!forwardEntry.due) {
+                  _newcomer.push(forwardEntry);
+                  groupMap[group] = (groupMap[group] || 0) + 1;
+                  return; // if we have taken forward we skip backward for same source
+                } else if (forwardEntry.due <= now) {
+                  _overdue.push(forwardEntry);
+                  groupMap[group] = (groupMap[group] || 0) + 1;
+                  return; // if we have taken forward we skip backward for same source
+                }
+              }
+            }
+            if (_takeBackward) {
+              const backwardEntry = getBackwardEntry(tiddler);
+              if (backwardEntry) {
+                if (!backwardEntry.due) {
+                  _newcomer.push(backwardEntry);
+                  groupMap[group] = (groupMap[group] || 0) + 1;
+                } else if (backwardEntry.due <= now) {
+                  _overdue.push(backwardEntry);
+                  groupMap[group] = (groupMap[group] || 0) + 1;
+                }
+              }
+            }
+          }
+        });
     }
 
     function next() {
@@ -285,7 +340,10 @@ Handling SRS messages.
   }
 
   // tested
-  exports.createSession = function (ref, src, direction, limit, groupFilter, groupStrategy, log, idle, widget) {
+  exports.createSession = function (ref, src, direction, limit,
+    groupFilter, groupStrategy,
+    groupListFilter, groupLimit,
+    log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:createSession");
     const context = {
@@ -313,11 +371,13 @@ Handling SRS messages.
     const limitValue = limit ? utils.parseInteger(limit, 100) : 100;
     groupFilter = utils.trimToUndefined(groupFilter);
     groupStrategy = utils.trimToUndefined(groupStrategy);
+    groupListFilter = utils.trimToUndefined(groupListFilter);
+    groupLimit = groupLimit ? utils.parseInteger(groupLimit, 0) : 0;
     if (idle) {
-      console.log("SRS:createSession", idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy);
+      console.log("SRS:createSession", idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit);
       return;
     }
-    const session = new Session(src, direction, groupFilter, groupStrategy, context);
+    const session = new Session(src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, context);
     widget.wiki["srs-session"] = session;
     const first = session.getFirst(log);
     // const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
