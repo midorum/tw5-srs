@@ -54,7 +54,7 @@ describe("The two-factor-linear strategy", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "two-factor-linear" });
             loggerSpy.and.callThrough();
-            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
+            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, undefined, undefined, log, idle, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
@@ -96,7 +96,7 @@ describe("The two-factor-linear strategy", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "two-factor-linear" });
             loggerSpy.and.callThrough();
-            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, log, idle, options.widget)).nothing();
+            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, undefined, undefined, log, idle, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();

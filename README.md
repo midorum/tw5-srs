@@ -8,5 +8,3 @@ SRS allows you to turn your wiki into a spaced repetition system. You create con
 ## How to use SRS and install
 
 You can find information about installing and using SRS in your wiki on the [demo page](https://tw5-srs.tiddlyhost.com/).
-
-Current version: 0.1.2
