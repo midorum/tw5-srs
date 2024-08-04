@@ -169,9 +169,11 @@ Handling SRS messages.
                 if (!backwardEntry.due) {
                   _newcomer.push(backwardEntry);
                   groupMap[group] = (groupMap[group] || 0) + 1;
+                  return; // if we have taken the tiddler we skip checking other groups for it
                 } else if (backwardEntry.due <= now) {
                   _overdue.push(backwardEntry);
                   groupMap[group] = (groupMap[group] || 0) + 1;
+                  return; // if we have taken the tiddler we skip checking other groups for it
                 }
               }
             }
@@ -217,8 +219,10 @@ Handling SRS messages.
         "\n_src", _src,
         "\n_takeForward", _takeForward,
         "\n_takeBackward", _takeBackward,
-        "\n_groupFilter", _groupFilter,
         "\n_groupStrategy", _groupStrategy,
+        "\n_groupListFilter", _groupListFilter,
+        "\n_groupFilter", _groupFilter,
+        "\n_groupLimit", _groupLimit,
         "\n_ttl", _ttl,
         "\n_repeat", _repeat,
         "\n_overdue", _overdue,
@@ -231,8 +235,10 @@ Handling SRS messages.
     console.log("A new SRS session created:"
       + "\nsrc: " + src
       + "\ndirection: " + direction
-      + "\ngroupFilter: " + _groupFilter
       + "\ngroupStrategy: " + _groupStrategy
+      + "\ngroupListFilter: " + _groupListFilter
+      + "\ngroupFilter: " + _groupFilter
+      + "\ngroupLimit: " + _groupLimit
     );
 
     return {
