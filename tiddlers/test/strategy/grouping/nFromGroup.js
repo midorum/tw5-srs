@@ -52,7 +52,7 @@ describe("The createSession service", () => {
                 var expectedTiddlersCount = 4;
                 var expectedNewComerTiddlers = 3;
                 var expectedRepeatTiddlers = 0;
-                while(expectedTiddlersCount-- > 0) {
+                while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
                     expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
@@ -94,7 +94,7 @@ describe("The createSession service", () => {
                 var expectedTiddlersCount = 10;
                 var expectedNewComerTiddlers = 9;
                 var expectedRepeatTiddlers = 0;
-                while(expectedTiddlersCount-- > 0) {
+                while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
                     expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
@@ -104,12 +104,60 @@ describe("The createSession service", () => {
                 expect(askedMap[skippedGroup]).toBeUndefined();
             })
 
+        it("should create a new session"
+            + " and schedule one tiddler to learn (two groups; same tillder in both groups)"
+            + " and set current tiddler"
+            + " when direction is both", () => {
+                // console.warn("----------------------")
+                const options = utils.setupWiki();
+                const context = utils.getSrsContext();
+                const ref = "$:/temp/srs/session";
+                const src = "some tag";
+                const direction = "backward";
+                const limit = undefined;
+                const group1 = "group1";
+                const group2 = "group2";
+                const groupStrategy = "nFromGroup";
+                const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
+                const groupFilter = "[<currentTiddler>tag<groupTitle>]"; // take item if it has apropriate group tag
+                const groupLimit = undefined; // no limit
+                const log = true;
+                const idle = false;
+                const sourceTiddlers = createSourceTiddlers_sameTiddlerInEachGroup(src, [group1, group2], options, context);
+                // console.warn(sourceTiddlers);
+                // console.warn(options.widget.wiki.getTiddler("sharedItem"))
+                const askedMap = {};
+                options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+                // consoleSpy.and.callThrough();
+                loggerSpy.and.callThrough();
+                expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, log, idle, options.widget)).nothing();
+                expect(Logger.alert).toHaveBeenCalledTimes(0);
+                const expectedTiddlersCount = 1;
+                var actualTiddlersCount = 0;
+                var expectedNewComerTiddlers = 0;
+                var expectedRepeatTiddlers = 0;
+                var asked;
+                asked = verifySession(ref, src, direction, expectedRepeatTiddlers, expectedNewComerTiddlers, 0, options);
+                do {
+                    // console.warn("asked", asked)
+                    if (asked.src) {
+                        actualTiddlersCount++;
+                        expectedRepeatTiddlers++;
+                        if (expectedNewComerTiddlers > 0) expectedNewComerTiddlers--;
+                    }
+                    expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                    asked = verifySession(ref, src, direction, expectedRepeatTiddlers, expectedNewComerTiddlers, 0, options);
+                } while (asked.src)
+                expect(expectedTiddlersCount).toEqual(actualTiddlersCount);
+                // console.warn("----------------------")
+            })
+
     });
 
 });
 
 function verifyAskedTiddler(asked, sourceTiddlers, askedMap) {
-    // console.warn(asked);
+    // console.warn("asked", asked);
     for (const group in sourceTiddlers.groups) {
         if (sourceTiddlers.groups[group].includes(asked.src)) {
             askedMap[group] = (askedMap[group] || 0) + 1;
@@ -120,7 +168,7 @@ function verifyAskedTiddler(asked, sourceTiddlers, askedMap) {
 
 function verifySession(session, srcTag, direction, repeatCount, newcomerCount, overdueCount, options) {
     const sessionInstance = options.widget.wiki.getTiddler(session);
-    // console.warn(sessionInstance);
+    // console.warn("sessionInstance", sessionInstance);
     expect(sessionInstance).toBeDefined();
     const sessionData = JSON.parse(sessionInstance.fields.text);
     expect(sessionData).toBeDefined();
@@ -150,6 +198,23 @@ function createSourceTiddlers(src, groups, options, context) {
             });
             groupMap[group].push(itemTitle);
         }
+    });
+    return {
+        groups: groupMap
+    }
+}
+
+function createSourceTiddlers_sameTiddlerInEachGroup(src, groups, options, context) {
+    const groupMap = {};
+    const itemTitle = "sharedItem";
+    options.widget.wiki.addTiddler({
+        title: itemTitle,
+        tags: [src, context.tags.scheduledForward, context.tags.scheduledBackward].concat(groups)
+    });
+    groups.forEach(group => {
+        options.widget.wiki.addTiddler({ title: group });
+        groupMap[group] = [];
+        groupMap[group].push(itemTitle);
     });
     return {
         groups: groupMap

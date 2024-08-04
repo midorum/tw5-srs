@@ -4,6 +4,10 @@ tags:
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.4
+
+* fixed: prevent asking the same tiddler several times if it is in more than one group
+
 !! 0.1.3
 
 * added log parameter to learning session template
