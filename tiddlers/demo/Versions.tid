@@ -1,6 +1,10 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.6
+
+* new supported answer `exclude` that allows to fast exclude the asked tiddler both from the learning session and SRS at all
+
 !! 0.1.5
 
 * new session option `resetAfter`  - time in minutes when the session will be refilled with new content (10 - by default; 0 - no refill; -1 - auto refill when the session becomes empty)

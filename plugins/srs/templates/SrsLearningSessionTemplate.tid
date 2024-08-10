@@ -25,6 +25,7 @@ type: text/vnd.tiddlywiki
     resetButtonText:"Again ~<<format-time next-step-reset>>",
     holdButtonText:"Hard ~<<format-time next-step-hold>>",
     onwardButtonText:"Good ~<<format-time next-step-onward>>",
+    excludeButtonText:"Exclude",
     answerTipText:"If it was easy - press the <code>Good</code> button. If it wasn't - press the <code>Hard</code> button. If you couldn't remember - press the <code>Again</code> button.",
     log
 )
@@ -186,6 +187,14 @@ $defer=<<answerLatency>>
  text="yes"
 />
 \end commit-answer-action
+\procedure exclude-question-action()
+<$action-confirm
+ $message="Do you wish to exclude this question from the SRS? You can always include it back manually."
+><$transclude
+ $variable="commit-answer-action"
+ answer="exclude"
+/></$action-confirm>
+\end exclude-question-action
 \procedure end-session-action()
 <$action-sendmessage
  $message="tm-srs-delete-session"
@@ -257,6 +266,11 @@ $defer=<<answerLatency>>
 ><$transclude
  $variable=onwardButtonText
 /></$button></$set></$reveal><$button
+ actions=<<exclude-question-action>>
+ class=<<buttonClass>>
+><$transclude
+ $variable=excludeButtonText
+/></$button><$button
  actions=<<end-session-action>>
  style.float=right
  class=<<buttonClass>>

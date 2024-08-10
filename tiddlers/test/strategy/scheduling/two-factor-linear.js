@@ -13,10 +13,12 @@ const Logger = $tw.utils.Logger.prototype;
 
 describe("The two-factor-linear strategy", () => {
     var consoleSpy;
+    var consoleDebugSpy;
     var loggerSpy;
 
     beforeEach(function () {
         consoleSpy = spyOn(console, 'log');
+        consoleDebugSpy = spyOn(console, 'debug');
         loggerSpy = spyOn(Logger, 'alert');
     });
 

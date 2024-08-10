@@ -21,10 +21,11 @@ const SRS_BACKWARD_LAST_FIELD = "srs-backward-last";
 const SRS_ANSWER_RESET = "reset";
 const SRS_ANSWER_HOLD = "hold";
 const SRS_ANSWER_ONWARD = "onward";
+const SRS_ANSWER_EXCLUDE = "exclude";
 
 const SUPPORTED_DIRECTIONS = [FORWARD_DIRECTION, BACKWARD_DIRECTION, BOTH_DIRECTION];
 const ANSWER_DIRECTIONS = [FORWARD_DIRECTION, BACKWARD_DIRECTION];
-const SUPPORTED_ANSWERS = [SRS_ANSWER_RESET, SRS_ANSWER_HOLD, SRS_ANSWER_ONWARD];
+const SUPPORTED_ANSWERS = [SRS_ANSWER_RESET, SRS_ANSWER_HOLD, SRS_ANSWER_ONWARD, SRS_ANSWER_EXCLUDE];
 
 function trimToUndefined(str) {
   if (!str) return undefined;
@@ -201,6 +202,7 @@ exports.srsUtils = {
   SRS_ANSWER_RESET: SRS_ANSWER_RESET,
   SRS_ANSWER_HOLD: SRS_ANSWER_HOLD,
   SRS_ANSWER_ONWARD: SRS_ANSWER_ONWARD,
+  SRS_ANSWER_EXCLUDE: SRS_ANSWER_EXCLUDE,
   trimToUndefined: trimToUndefined,
   parseJsonOrUndefined: parseJsonOrUndefined,
   parseInteger: parseInteger,
