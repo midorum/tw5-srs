@@ -39,10 +39,23 @@ describe("The createSession service", () => {
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, groupTag, options, context);
                 const askedMap = {};
-                options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
+                options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
                 // consoleSpy.and.callThrough();
                 loggerSpy.and.callThrough();
-                expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+                const params = {
+                    ref: ref,
+                    src: src,
+                    direction: direction,
+                    limit: limit,
+                    groupFilter: groupFilter,
+                    groupStrategy: groupStrategy,
+                    groupListFilter: undefined,
+                    groupLimit: undefined,
+                    resetAfter: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(params, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 const asked1 = verifySession(ref, src, direction, 0, 2, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked1, sourceTiddlers, askedMap);

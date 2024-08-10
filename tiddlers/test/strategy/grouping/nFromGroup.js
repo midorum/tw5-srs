@@ -47,7 +47,20 @@ describe("The createSession service", () => {
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
                 // consoleSpy.and.callThrough();
                 loggerSpy.and.callThrough();
-                expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, log, idle, options.widget)).nothing();
+                const params = {
+                    ref: ref,
+                    src: src,
+                    direction: direction,
+                    limit: limit,
+                    groupFilter: groupFilter,
+                    groupStrategy: groupStrategy,
+                    groupListFilter: groupListFilter,
+                    groupLimit: groupLimit,
+                    resetAfter: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(params, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 var expectedTiddlersCount = 4;
                 var expectedNewComerTiddlers = 3;
@@ -89,7 +102,20 @@ describe("The createSession service", () => {
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
                 // consoleSpy.and.callThrough();
                 loggerSpy.and.callThrough();
-                expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, log, idle, options.widget)).nothing();
+                const params = {
+                    ref: ref,
+                    src: src,
+                    direction: direction,
+                    limit: limit,
+                    groupFilter: groupFilter,
+                    groupStrategy: groupStrategy,
+                    groupListFilter: groupListFilter,
+                    groupLimit: groupLimit,
+                    resetAfter: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(params, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 var expectedTiddlersCount = 10;
                 var expectedNewComerTiddlers = 9;
@@ -130,7 +156,20 @@ describe("The createSession service", () => {
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
                 // consoleSpy.and.callThrough();
                 loggerSpy.and.callThrough();
-                expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, log, idle, options.widget)).nothing();
+                const params = {
+                    ref: ref,
+                    src: src,
+                    direction: direction,
+                    limit: limit,
+                    groupFilter: groupFilter,
+                    groupStrategy: groupStrategy,
+                    groupListFilter: groupListFilter,
+                    groupLimit: groupLimit,
+                    resetAfter: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(params, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 const expectedTiddlersCount = 1;
                 var actualTiddlersCount = 0;
