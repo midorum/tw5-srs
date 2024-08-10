@@ -16,7 +16,7 @@ Handling SRS messages.
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
   const SCHEDULING_CONFIGURATION_PREFIX = "$:/config/midorum/srs/scheduling";
 
-  const Session = function (src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, context) {
+  const Session = function (src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, context) {
     const self = this;
     const _comparator = (a, b) => a.due - b.due;
     const _now = () => new Date().getTime();
@@ -31,6 +31,8 @@ Handling SRS messages.
     var _groupStrategy = groupFilter && groupStrategy ? groupStrategy : undefined;
     var _groupListFilter = groupListFilter && groupFilter && groupStrategy ? groupListFilter : undefined;
     var _groupLimit = groupLimit && groupListFilter && groupFilter && groupStrategy ? groupLimit : undefined;
+    const _resetAfter = resetAfter && resetAfter > 0 ? resetAfter * 60000 : resetAfter === 0 || resetAfter === -1 ? 86400000 : 600000;
+    const _resetWhenEmpty = resetAfter === -1;
     var _ttl;
     var _repeat = [];
     var _overdue = [];
@@ -67,7 +69,7 @@ Handling SRS messages.
         checkGroupsUnderEachItem(now); // the item may contain groups
       }
       _overdue.sort(_comparator);
-      _ttl = now + 600000; // 10 minutes
+      _ttl = now + _resetAfter;
     }
 
     function checkGroupsUnderEachItem(now) {
@@ -223,6 +225,8 @@ Handling SRS messages.
         "\n_groupListFilter", _groupListFilter,
         "\n_groupFilter", _groupFilter,
         "\n_groupLimit", _groupLimit,
+        "\n_resetAfter", _resetAfter,
+        "\n_resetWhenEmpty", _resetWhenEmpty,
         "\n_ttl", _ttl,
         "\n_repeat", _repeat,
         "\n_overdue", _overdue,
@@ -239,6 +243,8 @@ Handling SRS messages.
       + "\ngroupListFilter: " + _groupListFilter
       + "\ngroupFilter: " + _groupFilter
       + "\ngroupLimit: " + _groupLimit
+      + "\nresetAfter: " + _resetAfter
+      + "\nresetWhenEmpty: " + _resetWhenEmpty
     );
 
     return {
@@ -257,10 +263,15 @@ Handling SRS messages.
         } else {
           refill();
         }
+        var entry = next();
+        if(_resetWhenEmpty && !entry) {
+          refill();
+          entry = next();
+        }
         if (log) _log();
         else _groups.length = 0;
         return {
-          entry: next(),
+          entry: entry,
           counters: counters()
         };
       },
@@ -346,26 +357,23 @@ Handling SRS messages.
   }
 
   // tested
-  exports.createSession = function (ref, src, direction, limit,
-    groupFilter, groupStrategy,
-    groupListFilter, groupLimit,
-    log, idle, widget) {
+  exports.createSession = function (params, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:createSession");
     const context = {
       wikiUtils: utils.getWikiUtils(widget.wiki)
     };
-    ref = utils.trimToUndefined(ref);
+    const ref = utils.trimToUndefined(params.ref);
     if (!ref) {
       logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
-    src = utils.trimToUndefined(src);
+    const src = utils.trimToUndefined(params.src);
     if (!src) {
       logger.alert(utils.formatString(alertMsg, "src"));
       return;
     }
-    direction = utils.trimToUndefined(direction);
+    var direction = utils.trimToUndefined(params.direction);
     const supportedDirections = utils.getSupportedDirections();
     if (!direction) {
       direction = utils.BOTH_DIRECTION;
@@ -373,19 +381,20 @@ Handling SRS messages.
       logger.alert("direction argument should be one of [" + supportedDirections + "]");
       return;
     }
-    limit = utils.trimToUndefined(limit);
+    const limit = utils.trimToUndefined(params.limit);
     const limitValue = limit ? utils.parseInteger(limit, 100) : 100;
-    groupFilter = utils.trimToUndefined(groupFilter);
-    groupStrategy = utils.trimToUndefined(groupStrategy);
-    groupListFilter = utils.trimToUndefined(groupListFilter);
-    groupLimit = groupLimit ? utils.parseInteger(groupLimit, 0) : 0;
-    if (idle) {
-      console.log("SRS:createSession", idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit);
+    const groupFilter = utils.trimToUndefined(params.groupFilter);
+    const groupStrategy = utils.trimToUndefined(params.groupStrategy);
+    const groupListFilter = utils.trimToUndefined(params.groupListFilter);
+    const groupLimit = params.groupLimit ? utils.parseInteger(params.groupLimit, 0) : 0;
+    const resetAfter = params.resetAfter ? utils.parseInteger(params.resetAfter, 10) : 10;
+    if (params.idle) {
+      console.log("SRS:createSession", params.idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter);
       return;
     }
-    const session = new Session(src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, context);
+    const session = new Session(src, direction, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, context);
     widget.wiki["srs-session"] = session;
-    const first = session.getFirst(log);
+    const first = session.getFirst(params.log);
     // const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
     const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction), context) : undefined;
     const data = {};

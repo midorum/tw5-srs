@@ -34,7 +34,20 @@ describe("The createSession service", () => {
         const log = undefined;
         const idle = true;
         const expectedMessage = "ref cannot be empty";
-        expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            src: src,
+            direction: direction,
+            limit: limit,
+            groupFilter: groupFilter,
+            groupStrategy: groupStrategy,
+            groupListFilter: undefined,
+            groupLimit: undefined,
+            resetAfter: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.createSession(params, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -51,7 +64,20 @@ describe("The createSession service", () => {
         const log = undefined;
         const idle = true;
         const expectedMessage = "src cannot be empty";
-        expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            src: src,
+            direction: direction,
+            limit: limit,
+            groupFilter: groupFilter,
+            groupStrategy: groupStrategy,
+            groupListFilter: undefined,
+            groupLimit: undefined,
+            resetAfter: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.createSession(params, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -68,7 +94,20 @@ describe("The createSession service", () => {
         const log = undefined;
         const idle = true;
         const expectedMessage = "direction argument should be one of [forward,backward,both]";
-        expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            src: src,
+            direction: direction,
+            limit: limit,
+            groupFilter: groupFilter,
+            groupStrategy: groupStrategy,
+            groupListFilter: undefined,
+            groupLimit: undefined,
+            resetAfter: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.createSession(params, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -92,8 +131,21 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
-            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
-            expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
             // console.warn(sessionInstance);
@@ -127,8 +179,21 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
-            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
-            expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
             // console.warn(sessionInstance);
@@ -163,8 +228,21 @@ describe("The createSession service", () => {
             const scheduledBackwardTemplate = { title: "scheduledBackward", tags: [src, context.tags.scheduledBackward] };
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
-            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
-            expect(messageHandler.createSession(ref, src, direction, limit, groupFilter, groupStrategy, undefined, undefined, log, idle, options.widget)).nothing();
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const sessionInstance = options.widget.wiki.getTiddler(ref);
             // console.warn(sessionInstance);

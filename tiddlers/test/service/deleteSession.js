@@ -50,7 +50,20 @@ describe("The deleteSession service", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const idle = false;
-        expect(messageHandler.createSession(ref, "some", "both", undefined, undefined, undefined, undefined, undefined, true, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            src: "some",
+            direction: "both",
+            limit: undefined,
+            groupFilter: undefined,
+            groupStrategy: undefined,
+            groupListFilter: undefined,
+            groupLimit: undefined,
+            resetAfter: undefined,
+            log: true,
+            idle: idle
+        };
+        expect(messageHandler.createSession(params, options.widget)).nothing();
         expect(options.widget.wiki["srs-session"]).toBeDefined();
         expect(messageHandler.deleteSession(ref, idle, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(0);

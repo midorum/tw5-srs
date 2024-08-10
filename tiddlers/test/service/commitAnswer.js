@@ -97,9 +97,22 @@ describe("The commitAnswer service", () => {
             templateMap[scheduledBackwardTemplate.title] = scheduledBackwardTemplate;
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
-            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             loggerSpy.and.callThrough();
-            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, undefined, undefined, log, idle, options.widget)).nothing();
+            const params = {
+                ref: ref,
+                src: srcTag,
+                direction: "both",
+                limit: undefined,
+                groupFilter: undefined,
+                groupStrategy: undefined,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
@@ -137,9 +150,22 @@ describe("The commitAnswer service", () => {
             templateMap[scheduledBackwardTemplate.title] = scheduledBackwardTemplate;
             options.widget.wiki.addTiddler(scheduledForwardTemplate);
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
-            options.widget.wiki.addTiddler({title:"$:/config/midorum/srs/scheduling/strategy", text: "linear"});
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             loggerSpy.and.callThrough();
-            expect(messageHandler.createSession(ref, srcTag, "both", undefined, undefined, undefined, undefined, undefined, log, idle, options.widget)).nothing();
+            const params = {
+                ref: ref,
+                src: srcTag,
+                direction: "both",
+                limit: undefined,
+                groupFilter: undefined,
+                groupStrategy: undefined,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked",firstAsked)
             expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();

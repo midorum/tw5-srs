@@ -36,10 +36,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-create-session", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.createSession(params.ref, params.src, params.direction, params.limit,
-        params.groupFilter, params.groupStrategy,
-        params.groupListFilter, params.groupLimit,
-        params.log, params.idle, widget);
+      messageHandler.createSession(params, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-delete-session", function (event) {
