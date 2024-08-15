@@ -30,6 +30,7 @@ The [[$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate]] template is 
 |!resetButtonText | no |text of the button to reset the question to the beginning of the learning curve |
 |!holdButtonText | no |text of the button to hold the question at the current position of the learning curve |
 |!onwardButtonText | no |text of the button to advance the question to the next position of the learning curve |
+|!excludeButtonText | no |text of the button to fast exclude the question from the SRS |
 |!answerTipText | no |the text of the hint displayed at the bottom of the answer card and explaining how to correctly interpret your answer |
 |!log | no |pass `true` if you want log session data into browser console |
 
