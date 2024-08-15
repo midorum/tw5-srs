@@ -1,6 +1,10 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.7
+
+* 
+
 !! 0.1.6
 
 * new supported answer `exclude` that allows to fast exclude the asked tiddler both from the learning session and SRS at all

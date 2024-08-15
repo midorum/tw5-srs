@@ -1,7 +1,6 @@
 capital: Brasília
 created: 20240509172238837
-modified: 20240517190447449
-tags: Country
+tags: Country $:/srs/tags/scheduledForward $:/srs/tags/scheduledBackward
 title: Brazil
 type: text/vnd.tiddlywiki
 
