@@ -232,10 +232,12 @@ $defer=<<answerLatency>>
  stateTitle=<<session>>
  stateIndex="showAnswer"
  text="yes"
-><$button
+>
+<$button
  actions=<<show-answer-action>>
  class=<<buttonClass>>
->Show answer</$button></$reveal><$reveal
+>Show answer</$button>
+</$reveal><$reveal
  type="match"
  stateTitle=<<session>>
  stateIndex="showAnswer"
@@ -243,7 +245,8 @@ $defer=<<answerLatency>>
 ><$transclude
  $variable="clock-icon"
  $mode=inline
-/><$set
+/>
+<span><$set
  name=disabled
  tiddler=<<buttonsDisabledState>>
  field="text"
@@ -265,16 +268,19 @@ $defer=<<answerLatency>>
  class=<<buttonClass>>
 ><$transclude
  $variable=onwardButtonText
-/></$button></$set></$reveal><$button
+/></$button></$set></span>
+</$reveal>
+<span
+ style="float:right"
+><$button
  actions=<<exclude-question-action>>
  class=<<buttonClass>>
 ><$transclude
  $variable=excludeButtonText
 /></$button><$button
  actions=<<end-session-action>>
- style.float=right
  class=<<buttonClass>>
->End session</$button>
+>End session</$button></span>
 \end srs-session-actions
 
 \procedure srs-session-answer-tip()

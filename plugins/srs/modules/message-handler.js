@@ -28,9 +28,9 @@ Handling SRS messages.
     var _takeForward = direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION;
     var _takeBackward = direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION;
     var _groupFilter = groupFilter && groupStrategy ? groupFilter : undefined;
-    var _groupStrategy = groupFilter && groupStrategy ? groupStrategy : undefined;
-    var _groupListFilter = groupListFilter && groupFilter && groupStrategy ? groupListFilter : undefined;
-    var _groupLimit = groupLimit && groupListFilter && groupFilter && groupStrategy ? groupLimit : undefined;
+    var _groupListFilter = groupListFilter && groupStrategy ? groupListFilter : undefined;
+    var _groupStrategy = groupStrategy && (groupFilter || groupListFilter) ? groupStrategy : undefined;
+    var _groupLimit = groupLimit && groupListFilter ? groupLimit : undefined;
     const _resetAfter = resetAfter && resetAfter > 0 ? resetAfter * 60000 : resetAfter === 0 || resetAfter === -1 ? 86400000 : 600000;
     const _resetWhenEmpty = resetAfter === -1;
     var _ttl;
@@ -63,7 +63,9 @@ Handling SRS messages.
       _repeat = [];
       _overdue = [];
       _newcomer = [];
-      if (_groupStrategy === "nFromGroup") {
+      if (_groupStrategy === "taggedAny") {
+        checkTaggedAny(now); // the item has any tag from groupListFilter
+      } else if (_groupStrategy === "nFromGroup") {
         checkGroupsOverEachItem(now); // groups may contain the item
       } else {
         checkGroupsUnderEachItem(now); // the item may contain groups
@@ -183,6 +185,59 @@ Handling SRS messages.
         });
     }
 
+    function checkTaggedAny(now) {
+      if (!_groupListFilter) throw "groupListFilter should be defined";
+      const groupList = _context.wikiUtils.filterTiddlers(_groupListFilter);
+      if (!groupList.length) throw "group list is empty";
+      var countDown = _groupLimit ? groupList.length * _groupLimit : Number.MAX_SAFE_INTEGER;
+      const groupMap = {};
+      const allTitles = _context.wikiUtils.allTitlesWithTag(_src);
+      for (let i = 0; i < allTitles.length; i++) {
+        const title = allTitles[i];
+        const tiddler = _context.wikiUtils.withTiddler(title);
+        const tags = tiddler.getTiddlerTagsShallowCopy();
+        const intersection = utils.arraysIntersection(groupList, tags);
+        if (!intersection.length) continue;
+        const forwardEntry = getForwardEntry(tiddler);
+        const backwardEntry = getBackwardEntry(tiddler);
+        for (let j = 0; j < intersection.length; j++) {
+          const group = intersection[j];
+          if (groupMap[group] && groupMap[group] >= _groupLimit) continue;
+          if (_takeForward) {
+            if (forwardEntry) {
+              if (!forwardEntry.due) {
+                _newcomer.push(forwardEntry);
+                groupMap[group] = (groupMap[group] || 0) + 1;
+                countDown--;
+                break; // if we have taken forward we skip backward for same source
+              } else if (forwardEntry.due <= now) {
+                _overdue.push(forwardEntry);
+                groupMap[group] = (groupMap[group] || 0) + 1;
+                countDown--;
+                break; // if we have taken forward we skip backward for same source
+              }
+            }
+          }
+          if (_takeBackward) {
+            if (backwardEntry) {
+              if (!backwardEntry.due) {
+                _newcomer.push(backwardEntry);
+                groupMap[group] = (groupMap[group] || 0) + 1;
+                countDown--;
+                break; // if we have taken the tiddler we skip checking other groups for it
+              } else if (backwardEntry.due <= now) {
+                _overdue.push(backwardEntry);
+                groupMap[group] = (groupMap[group] || 0) + 1;
+                countDown--;
+                break; // if we have taken the tiddler we skip checking other groups for it
+              }
+            }
+          }
+        }
+        if (countDown <= 0) break;
+      }
+    }
+
     function next() {
       const now = _now();
       if (_repeat.length !== 0 && _repeat[0].due <= now) {
@@ -201,7 +256,7 @@ Handling SRS messages.
     }
 
     function acceptAnswer(src, newDue, answer) {
-      if(answer === utils.SRS_ANSWER_EXCLUDE) {
+      if (answer === utils.SRS_ANSWER_EXCLUDE) {
         _current = undefined;
         return;
       }
@@ -268,7 +323,7 @@ Handling SRS messages.
           refill();
         }
         var entry = next();
-        if(_resetWhenEmpty && !entry) {
+        if (_resetWhenEmpty && !entry) {
           refill();
           entry = next();
         }
@@ -588,7 +643,7 @@ Handling SRS messages.
     const fields = {};
     fields[srsFieldsNames.dueField] = newDue;
     fields[srsFieldsNames.lastField] = newLast;
-    if(removeTag) {
+    if (removeTag) {
       fields.tags = utils.purgeArray(tiddler.getTiddlerTagsShallowCopy(), [srsFieldsNames.tag]);
     }
     tiddler.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(fields);

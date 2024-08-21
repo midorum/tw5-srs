@@ -1,6 +1,10 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.7
+
+* new `taggedAny` grouping strategy (see [[here|SrsLearningSessionTemplate]] for details)
+
 !! 0.1.6
 
 * new supported answer `exclude` that allows to fast exclude the asked tiddler both from the learning session and SRS at all
@@ -16,11 +20,11 @@ type: text/vnd.tiddlywiki
 !! 0.1.3
 
 * added log parameter to learning session template
-* added nFromGroup grouping strategy
+* added `nFromGroup` grouping strategy (see [[here|SrsLearningSessionTemplate]] for details)
 
 !! 0.1.2
 
-* added two factor linear sceduling strategy
+* added two factor linear scheduling strategy
 * added randomly decreasing hold and onward steps
 * removed current asked item from repeat counter
 * added basic scheduling configuration

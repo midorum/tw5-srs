@@ -68,6 +68,29 @@ function purgeArray(srcArray, purgeArray) {
   return srcArray.filter(el => !purgeArray.includes(el));
 }
 
+function arraysIntersection(arr1, arr2) {
+  if (!Array.isArray(arr1) || !Array.isArray(arr2) || !arr1.length || !arr2.length) return [];
+  var a1, a2;
+  if (arr1.length < arr2.length) {
+    a1 = arr1;
+    a2 = arr2;
+  } else {
+    a1 = arr2;
+    a2 = arr1;
+  }
+  const map = new Map();
+  const result = [];
+  a1.forEach(i => map.set(i, i));
+  for (let i = 0; i < a2.length; i++) {
+    if (map.has(a2[i])) {
+      result.push(a2[i]);
+      map.delete(a2[i]);
+      if(!map.size) break;
+    }
+  }
+  return result;
+}
+
 function getSupportedDirections() {
   return SUPPORTED_DIRECTIONS.slice();
 };
@@ -207,6 +230,7 @@ exports.srsUtils = {
   parseJsonOrUndefined: parseJsonOrUndefined,
   parseInteger: parseInteger,
   arraysAreEqual: arraysAreEqual,
+  arraysIntersection: arraysIntersection,
   purgeArray: purgeArray,
   getSupportedDirections: getSupportedDirections,
   getAnswerDirections: getAnswerDirections,

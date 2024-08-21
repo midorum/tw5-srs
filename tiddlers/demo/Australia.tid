@@ -1,7 +1,6 @@
 capital: Canberra
 created: 20240509172704079
-modified: 20240517190444990
-tags: Country
+tags: Country $:/srs/tags/scheduledForward $:/srs/tags/scheduledBackward
 title: Australia
 type: text/vnd.tiddlywiki
 
