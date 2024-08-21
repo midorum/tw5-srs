@@ -45,7 +45,8 @@ Possible values for `groupStrategy` attribute:
 |!groupOnly |the tiddler belongs the group, specified in `groupFilter` |
 |!notInGroup |the tiddler does not belong the group, specified in `groupFilter` |
 |!oneFromGroup |only one tiddler will be taken for each group, specified in `groupFilter` |
-|!nFromGroup |only tiddlers in each group returned `groupListFilter` limited by `groupLimit` |
+|!nFromGroup |only tiddlers in each group returned by `groupListFilter` limited by `groupLimit` |
+|!taggedAny |only tiddlers that has tags returned by `groupListFilter` limited by `groupLimit`. This strategy is much faster than other ones and does not require `groupFilter` parameter |
 
 !! Examples
 
