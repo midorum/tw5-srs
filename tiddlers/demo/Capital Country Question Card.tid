@@ -1,8 +1,7 @@
-created: 20240516104455537
-modified: 20240516140644342
-tags: 
 title: Capital Country Question Card
 type: text/vnd.tiddlywiki
+tags: $:/srs/tags/backwardQuestionCard
+srs-current-type: Country
 
 \parameters (
  src,

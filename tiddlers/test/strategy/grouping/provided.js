@@ -73,7 +73,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return {};
                     }
                 }
@@ -113,7 +113,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return [
                             {}
                         ];
@@ -155,7 +155,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return [
                             {
                                 type: "type"
@@ -199,7 +199,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -244,7 +244,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -290,7 +290,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, time) {
+                    run: function(wiki, limit, time) {
                         return [
                             {
                                 type: "type",
