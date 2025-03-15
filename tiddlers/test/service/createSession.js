@@ -25,7 +25,7 @@ describe("The createSession service", () => {
         expect(messageHandler.createSession).toBeDefined();
     })
 
-    it("should fail when ref argument is not defined", () => {
+    it("should fail when the `ref` argument is not defined", () => {
         const options = utils.setupWiki();
         const ref = undefined;
         const src = undefined;
@@ -55,7 +55,7 @@ describe("The createSession service", () => {
         expect(results[0]).toContain(expectedMessage);
     })
 
-    it("should fail when src argument is not defined", () => {
+    it("should fail when the `src` argument is not defined", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const src = undefined;
@@ -85,7 +85,7 @@ describe("The createSession service", () => {
         expect(results[0]).toContain(expectedMessage);
     })
 
-    it("should fail when direction argument is wrong", () => {
+    it("should fail when the `direction` argument is wrong", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const src = "some";
@@ -95,7 +95,7 @@ describe("The createSession service", () => {
         const groupStrategy = undefined;
         const log = undefined;
         const idle = true;
-        const expectedMessage = "direction argument should be one of [forward,backward,both]";
+        const expectedMessage = "direction should be one of [forward,backward,both]";
         const params = {
             ref: ref,
             src: src,
@@ -117,8 +117,8 @@ describe("The createSession service", () => {
 
     it("should create a new session"
         + " and schedule one tiddler to learn"
-        + " and set current tiddler"
-        + " when direction is forward", () => {
+        + " and set the current tiddler"
+        + " when the direction is forward", () => {
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
             const ref = "$:/temp/srs/session";
@@ -165,8 +165,8 @@ describe("The createSession service", () => {
 
     it("should create a new session"
         + " and schedule one tiddler to learn"
-        + " and set current tiddler"
-        + " when direction is backward", () => {
+        + " and set the current tiddler"
+        + " when the direction is backward", () => {
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
             const ref = "$:/temp/srs/session";
@@ -213,8 +213,8 @@ describe("The createSession service", () => {
 
     it("should create a new session"
         + " and schedule two tiddlers to learn"
-        + " and set current tiddler"
-        + " when direction is both", () => {
+        + " and set the current tiddler"
+        + " when the direction is both", () => {
             // console.warn(">>>");
             const options = utils.setupWiki();
             const context = utils.getSrsContext();

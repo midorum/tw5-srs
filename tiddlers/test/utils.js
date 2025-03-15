@@ -34,6 +34,7 @@ exports.setupWiki = function (wikiOptions) {
     var container = $tw.fakeDocument.createElement("div");
     widgetNode.render(container, null);
     return {
+        env: $tw,
         wiki: wiki,
         widget: widgetNode,
         contaienr: container

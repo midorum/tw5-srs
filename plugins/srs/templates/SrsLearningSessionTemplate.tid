@@ -1,6 +1,3 @@
-created: 20240517060025178
-modified: 20240517102851580
-tags: 
 title: $:/plugins/midorum/srs/templates/SrsLearningSessionTemplate
 type: text/vnd.tiddlywiki
 
@@ -15,6 +12,7 @@ type: text/vnd.tiddlywiki
     limit:100,
     answerLatency:1000,
     resetAfter,
+    listProvider,
     directions:"forward backward both",
     directionButtons:"[[Start learn in forward direction]] [[Start learn in backward direction]] [[Start learn in both directions]]",
     buttonClass,
@@ -43,6 +41,7 @@ type: text/vnd.tiddlywiki
  direction="$direction$"
  limit=<<limit>>
  resetAfter=<<resetAfter>>
+ listProvider=<<listProvider>>
  log=<<log>>
 /><$action-setfield
  $tiddler=<<session>>

@@ -1,5 +1,3 @@
-created: 20240516102434996
-modified: 20240517163604519
 title: Organizing Learning Session
 type: text/vnd.tiddlywiki
 
@@ -8,7 +6,7 @@ Once you've added a few tiddlers to your spaced repetition system, it's time to 
 SRS does not automatically create flashcards for training, since it knows absolutely nothing about the structure of your data. Therefore, first, let's create a [[card containing a question about the capital of the country|Country Capital Question Card]] (we will consider this a question in the “forward” direction). We will also need a [[card to answer this question|Country Capital Answer Card]].
 
 <<<
-If you look at the contents of our cards, you will see that they are extremely simple. They take two parameters: the `src` parameter, which contains the title of the tiddler that the SRS has chosen for the question (and answer), and the `random` parameter, which contains some random number.
+If you look at contents of our cards, you will see that they are extremely simple. They take two parameters: the `src` parameter, which contains the title of the tiddler that the SRS has chosen for the question (and answer), and the `random` parameter, which contains some random number.
 
 We will directly use the `src` parameter to receive data from the tiddler with our data and draw the contents of the card depending on its type.
 
