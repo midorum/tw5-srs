@@ -48,7 +48,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-commit-answer", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.commitAnswer(params.ref, params.answer, params.log, params.idle, widget);
+      messageHandler.commitAnswer(params.ref, params.answer, params.updateRelated, params.log, params.idle, widget);
     });
 
   };

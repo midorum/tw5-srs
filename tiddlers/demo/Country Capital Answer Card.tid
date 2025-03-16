@@ -2,6 +2,7 @@ title: Country Capital Answer Card
 type: text/vnd.tiddlywiki
 tags: $:/srs/tags/forwardAnswerCard
 srs-current-type: Country
+srs-answer-related-filter: [tag[RelatedConcept1]tag<currentTiddler>] [<currentTiddler>tags[]tag[RelatedConcept2]]
 
 \parameters (
  src,

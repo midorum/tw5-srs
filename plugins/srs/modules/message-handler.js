@@ -405,6 +405,9 @@ Handling SRS messages.
           direction: _current.direction,
           src: _current.src
         };
+      },
+      getSrc() {
+        return _src;
       }
     }
 
@@ -544,8 +547,9 @@ Handling SRS messages.
     const session = new Session(src, direction, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, listProvider, context);
     widget.wiki["srs-session"] = session;
     const first = session.getFirst(params.log);
-    // const first = session.getFirst(src, direction, groupFilter, groupStrategy, log, context);
-    const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction, context), context) : undefined;
+    // const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction, context), context) : undefined;
+    const nextSteps = first.entry ? getNextStepsForTitle(first.entry.src, first.entry.direction, context) : undefined;
+    const answerRelatedFilter = first.entry ? getAnswerRelatedFilter(first.entry, session.getSrc(), context) : undefined;
     const data = {};
     data["src"] = groupStrategy === "provided" ? "provided" : src;
     data["direction"] = direction;
@@ -556,6 +560,7 @@ Handling SRS messages.
     data["current-direction"] = first.entry ? first.entry.direction : undefined;
     data["current-due"] = first.entry ? first.entry.due : undefined;
     data["current-type"] = first.entry ? first.entry.type : undefined;
+    data["current-answer-related-filter"] = answerRelatedFilter;
     data["counter-repeat"] = first.counters.repeat;
     data["counter-overdue"] = first.counters.overdue;
     data["counter-newcomer"] = first.counters.newcomer;
@@ -592,7 +597,7 @@ Handling SRS messages.
   }
 
   // tested
-  exports.commitAnswer = function (ref, answer, log, idle, widget) {
+  exports.commitAnswer = function (ref, answer, updateRelated, log, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:commitAnswer");
     const context = {
@@ -615,7 +620,7 @@ Handling SRS messages.
       return;
     }
     if (idle) {
-      console.log("SRS:commitAnswer", idle, ref, src, direction, answer);
+      console.log("SRS:commitAnswer", idle, ref, direction, answer, updateRelated);
       return;
     }
     if (!context.wikiUtils.withTiddler(ref).exists()) {
@@ -633,14 +638,20 @@ Handling SRS messages.
       logger.alert("Source tiddler not found: " + asked.src);
       return;
     }
-    const newDue = updateSrsFields(srcTiddler, asked.direction, answer, context);
+    const relatedTiddlers = updateRelated ? context.wikiUtils.filterTiddlers(updateRelated.replaceAll("<currentTiddler>", "[" + srcTiddler.getTitle() + "]"))
+      .map(title => context.wikiUtils.withTiddler(title))
+      .filter(tiddler => tiddler.exists()) : [];
+    const newDue = updateSrsFields(srcTiddler, relatedTiddlers, asked.direction, answer, context);
     const next = session.acceptAnswerAndGetNext(asked.src, newDue, answer, log);
-    const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction, context), context) : undefined;
+    // const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction, context), context) : undefined;
+    const nextSteps = next.entry ? getNextStepsForTitle(next.entry.src, next.entry.direction, context) : undefined;
+    const answerRelatedFilter = next.entry ? getAnswerRelatedFilter(next.entry, session.getSrc(), context) : undefined;
     const data = {};
     data["current-src"] = next.entry ? next.entry.src : undefined;
     data["current-direction"] = next.entry ? next.entry.direction : undefined;
     data["current-due"] = next.entry ? next.entry.due : undefined;
     data["current-type"] = next.entry ? next.entry.type : undefined;
+    data["current-answer-related-filter"] = answerRelatedFilter;
     data["counter-repeat"] = next.counters.repeat;
     data["counter-overdue"] = next.counters.overdue;
     data["counter-newcomer"] = next.counters.newcomer;
@@ -654,7 +665,8 @@ Handling SRS messages.
 
   // all spaced repetition calcualtion logic is here
   // if currentStep is undefined, it should return default steps
-  function getNextSteps(currentStep, context) {
+  function calculateNextSteps(currentDueDate, currentLastDate, context) {
+    const currentStep = currentDueDate && currentLastDate ? currentDueDate - currentLastDate : undefined;
     const strategy = context.wikiUtils.withTiddler(SCHEDULING_CONFIGURATION_PREFIX + "/strategy").getTiddlerField("text");
     if (strategy === "linear") return getLinearStrategyNextSteps(currentStep, context);
     if (strategy === "two-factor-linear") return getTwoFactorLinearStrategyNextSteps(currentStep, context);
@@ -712,25 +724,39 @@ Handling SRS messages.
     };
   }
 
-  function getNextStepsForTiddler(tiddler, srsFieldsNames, context) {
+  function getSrsFieldsValues(tiddler, srsFieldsNames) {
     if (!tiddler || !srsFieldsNames) return undefined;
     const due = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.dueField));
     const last = utils.parseInteger(tiddler.getTiddlerField(srsFieldsNames.lastField));
-    return (due && last) ? getNextSteps(due - last, context) : getNextSteps(undefined, context);
+    return { due, last };
   }
 
-  function updateSrsFields(tiddler, direction, answer, context) {
+  function getNextStepsForTitle(title, direction, context) {
+    const tiddler = context.wikiUtils.withTiddler(title);
+    if (!tiddler) return undefined;
     const srsFieldsNames = getSrsFieldsNames(direction, context);
-    const nextSteps = getNextStepsForTiddler(tiddler, srsFieldsNames, context);
+    const { due, last } = getSrsFieldsValues(tiddler, srsFieldsNames);
+    return calculateNextSteps(due, last, context);
+  }
+
+  function updateSrsFields(tiddler, relatedTiddlers, direction, answer, context) {
     const now = new Date().getTime();
-    const newDue = new Date(answer === utils.SRS_ANSWER_HOLD ? now + randomlyDecreaseValue(nextSteps.hold, nextSteps.reset)
-      : answer === utils.SRS_ANSWER_ONWARD ? now + randomlyDecreaseValue(nextSteps.onward, nextSteps.reset)
-        : now + nextSteps.reset).getTime();
+    const srsFieldsNames = getSrsFieldsNames(direction, context);
+    const newDue = calculateDueDate(tiddler, answer, srsFieldsNames, now, context);
     storeSrsFields(tiddler, srsFieldsNames, newDue, now, answer === utils.SRS_ANSWER_EXCLUDE, context);
+    if (answer !== utils.SRS_ANSWER_RESET && answer !== utils.SRS_ANSWER_EXCLUDE && relatedTiddlers) relatedTiddlers.forEach(relatedTiddler => {
+      const newDue = calculateDueDate(relatedTiddler, answer, srsFieldsNames, now, context);
+      storeSrsFields(relatedTiddler, srsFieldsNames, newDue, now, false, context);
+    });
     return newDue;
   }
+  
+  function calculateDueDate(tiddler, answer, srsFieldsNames, now, context) {
+    const { due, last } = getSrsFieldsValues(tiddler, srsFieldsNames);
+    return due > now ? now + (due - last) : decreaseDueDate(answer, calculateNextSteps(due, last, context), now);
+  }
 
-  function storeSrsFields(tiddler, srsFieldsNames, newDue, newLast, removeTag, context) {
+  function storeSrsFields(tiddler, srsFieldsNames, newDue, newLast, removeTag) {
     const fields = {};
     fields[srsFieldsNames.dueField] = newDue;
     fields[srsFieldsNames.lastField] = newLast;
@@ -738,6 +764,19 @@ Handling SRS messages.
       fields.tags = utils.purgeArray(tiddler.getTiddlerTagsShallowCopy(), [srsFieldsNames.tag]);
     }
     tiddler.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(fields);
+  }
+
+  function decreaseDueDate(answer, steps, now) {
+    return new Date(answer === utils.SRS_ANSWER_HOLD ? now + randomlyDecreaseValue(steps.hold, steps.reset)
+      : answer === utils.SRS_ANSWER_ONWARD ? now + randomlyDecreaseValue(steps.onward, steps.reset)
+        : now + steps.reset).getTime();
+  }
+
+  function getAnswerRelatedFilter(sessionEntry, sessionSrc, context) {
+    const answerCardsTag = sessionEntry.direction === utils.FORWARD_DIRECTION ? context.tags.forwardAnswerCard : context.tags.backwardAnswerCard;
+    const answerCards = context.wikiUtils.filterTiddlers("[all[shadows+tiddlers]tag[" + answerCardsTag + "]field:srs-current-type[" + (sessionEntry.type || sessionSrc) + "]last[]]")
+    const answerCardTiddler = answerCards && answerCards.length ? context.wikiUtils.withTiddler(answerCards[0]) : undefined;
+    return answerCardTiddler ? answerCardTiddler.getTiddlerField("srs-answer-related-filter") : undefined;
   }
 
   function calculateEstimatedEndTime(counters) {

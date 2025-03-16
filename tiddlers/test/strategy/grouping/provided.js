@@ -326,6 +326,7 @@ describe("The createSession service", () => {
                 const src1 = "src1";
                 const src2 = "src2";
                 const limit = undefined;
+                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const src1Template = { title: "src1_scheduledForward", tags: [src1, context.tags.scheduledForward] };
@@ -391,7 +392,7 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-overdue"]).toEqual(0);
                 expect(sessionData["counter-newcomer"]).toEqual(1);
                 // answer first question
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 sessionInstance = options.widget.wiki.getTiddler(ref);
                 // console.warn(sessionInstance);
                 expect(sessionInstance).toBeDefined();
@@ -404,7 +405,7 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-overdue"]).toEqual(0);
                 expect(sessionData["counter-newcomer"]).toEqual(0);
                 // answer second question
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 sessionInstance = options.widget.wiki.getTiddler(ref);
                 // console.warn(sessionInstance);
                 expect(sessionInstance).toBeDefined();

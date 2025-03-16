@@ -37,6 +37,7 @@ describe("The createSession service", () => {
                 const limit = undefined;
                 const groupFilter = "[<currentTiddler>tags[]tag[" + groupTag + "]]";
                 const groupStrategy = "oneFromGroup";
+                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, groupTag, options, context);
@@ -61,10 +62,10 @@ describe("The createSession service", () => {
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 const asked1 = verifySession(ref, src, direction, 0, 2, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked1, sourceTiddlers, askedMap);
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 const asked2 = verifySession(ref, src, direction, 1, 1, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked2, sourceTiddlers, askedMap);
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 const asked3 = verifySession(ref, src, direction, 2, 0, 0, options);
                 verifyEachGroupShouldBeAskedOnlyOnce(asked3, sourceTiddlers, askedMap);
                 expect(askedMap["group1"]).toBeDefined();

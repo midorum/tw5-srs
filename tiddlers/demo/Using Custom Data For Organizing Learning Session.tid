@@ -24,10 +24,10 @@ Produces custom data for SRS learning session
 
 exports.name = "YOUR_MACRO_NAME";
 exports.params = [
-  {name: "wiki"},
-  {name: "direction"},
-  {name: "limit"},
-  {name: "time"}
+  {name: "wiki", description: "Object that allows to retrieve data from the wiki"},
+  {name: "direction", description: "Direction of the learning choosed by the user: 'forward', 'backward' or 'both'"},
+  {name: "limit", description: "Maximum number of items to take"},
+  {name: "time", description: "Current time"}
 ];
 exports.run = function(wiki, direction, limit, time) {
     // put your code here
@@ -62,7 +62,7 @@ The `exports.params` field contains the list of parameters that the macro accept
 The `wiki` parameter is the reference to the wiki object. You can use it to get your tiddlers from the wiki. Actually it is not a real wiki object. It's rather a proxy object that provide some methods to get information from the real wiki. You cannot change the real wiki through this object. The `wiki` object has following methods and constants:
 
 * `getTitlesWithTag(tag)` - returns a list of the tiddler titles that are tagged with a given tag
-* `filterTiddlers(filterString)` - returns a list of the tiddler titles which are filtered accordingly to the filter string. You can read about TiddlyWiki filters [[here|https://tiddlywiki.com/#Filters]] and [[here|https://groktiddlywiki.com/read/#Filters]].
+* `filterTitles(filterString)` - returns a list of the tiddler titles which are filtered accordingly to the filter string. You can read about TiddlyWiki filters [[here|https://tiddlywiki.com/#Filters]] and [[here|https://groktiddlywiki.com/read/#Filters]].
 * `allTitles()` - returns a list of all tiddler titles
 * `allShadowTitles()` - returns a list of all shadow tiddler titles
 * `tiddlerExists(title)` - returns `true` if the tiddler with the given title exists (excludes shadow tiddlers)

@@ -93,6 +93,10 @@ type: text/vnd.tiddlywiki
 /><$transclude
  $variable="current-direction"
 />&#10;<$text
+ text="current type: "
+/><$transclude
+ $variable="current-type"
+/>&#10;<$text
  text="random: "
 /><$transclude
  $tiddler=<<session>>
@@ -173,6 +177,7 @@ $defer=<<answerLatency>>
  $message="tm-srs-commit-answer"
  ref=<<session>>
  answer="$answer$"
+ updateRelated=<<current-answer-related-filter>>
  log=<<log>>
 /><$action-setfield
  $tiddler=<<session>>
@@ -231,8 +236,7 @@ $defer=<<answerLatency>>
  stateTitle=<<session>>
  stateIndex="showAnswer"
  text="yes"
->
-<$button
+><$button
  actions=<<show-answer-action>>
  class=<<buttonClass>>
 >Show answer</$button>
@@ -313,6 +317,10 @@ $defer=<<answerLatency>>
  variable="current-src"
  filter="[<session>getindex[current-src]]"
 ><$set
+ name="current-answer-related-filter"
+ filter="[<session>getindex[current-answer-related-filter]]"
+ select="0"
+><$set
  name=random
  tiddler=<<session>>
  index="random"
@@ -326,7 +334,7 @@ $defer=<<answerLatency>>
  filter="[<current-direction>compare:string:eq[forward]]"
 ><$list
  variable="questionCard"
- filter="[tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>last[]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
  $tiddler=<<questionCard>>
  src=<<current-src>>
@@ -338,24 +346,24 @@ $defer=<<answerLatency>>
  text="yes"
 ><hr><$list
  variable="answerCard"
- filter="[tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>last[]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
  $tiddler=<<answerCard>>
  src=<<current-src>>
  random=<<random>>
 /></$list><$list
- filter="[tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
 >
 I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
 </$list></$reveal></$list><$list
- filter="[tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
 >
 I couldn't find any question card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
 </$list></$list><$list
  filter="[<current-direction>compare:string:eq[backward]]"
 ><$list
  variable="questionCard"
- filter="[tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>last[]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
  $tiddler=<<questionCard>>
  src=<<current-src>>
@@ -367,17 +375,17 @@ I couldn't find any question card template for the source <code><<current-type>>
  text="yes"
 ><hr><$list
  variable="answerCard"
- filter="[tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>last[]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
  $tiddler=<<answerCard>>
  src=<<current-src>>
  random=<<random>>
 /></$list><$list
- filter="[tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
 >
 I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
 </$list></$reveal></$list><$list
- filter="[tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
 >
 I couldn't find any question card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
 </$list></$list><$reveal
@@ -388,4 +396,4 @@ I couldn't find any question card template for the source <code><<current-type>>
 ><$transclude
  $variable="srs-session-answer-tip"
  $mode=block
-/></$reveal></$set></$list></$list></$list></section>
+/></$reveal></$set></$set></$list></$list></$list></section>
