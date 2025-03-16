@@ -6,6 +6,7 @@ type: text/vnd.tiddlywiki
 * added possibility to use custom data for organizing learning session (see [[here|Using Custom Data For Organizing Learning Session]] for details)
 * added a new [[SrsLearningSessionDynamicTemplate]] template that allows to mix data from different sources and different types in one learning session
 * deprecated the [[SrsLearningSessionTemplate]] template
+* optionally preset SRS related fields when scheduling a tiddler (to make this done set the `preset` param for `tm-srs-schedule` message to `true`)
 
 !! 0.1.7
 

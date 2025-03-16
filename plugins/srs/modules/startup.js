@@ -24,7 +24,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-schedule", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.schedule(params.ref, params.direction, params.idle, widget);
+      messageHandler.schedule(params.ref, params.direction, params.preset, params.idle, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-unschedule", function (event) {

@@ -411,7 +411,7 @@ Handling SRS messages.
   };
 
   // tested
-  exports.schedule = function (ref, direction, idle, widget) {
+  exports.schedule = function (ref, direction, preset, idle, widget) {
     const alertMsg = "%1 cannot be empty";
     const logger = new $tw.utils.Logger("SRS:schedule");
     const context = {
@@ -429,19 +429,35 @@ Handling SRS messages.
       logger.alert(utils.formatString(alertMsg + " and should be one of %2", "direction", supportedDirections));
       return;
     }
+    const tiddler = context.wikiUtils.withTiddler(ref);
+    if (!tiddler.exists()) {
+      logger.alert("Tiddler not found: " + ref);
+      return;
+    }
     if (idle) {
-      console.log("SRS:schedule", idle, ref, direction);
+      console.log("SRS:schedule", idle, ref, direction, preset);
       return;
     }
     const tags = [];
+    const fields = {};
     if (direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
       tags.push(context.tags.scheduledForward);
+      if (preset && !tiddler.getTiddlerField(utils.SRS_FORWARD_DUE_FIELD)) {
+        fields[utils.SRS_FORWARD_DUE_FIELD] = utils.SRS_BASE_TIME;
+        fields[utils.SRS_FORWARD_LAST_FIELD] = utils.SRS_BASE_TIME;
+      }
     }
     if (direction === utils.BACKWARD_DIRECTION || direction === utils.BOTH_DIRECTION) {
       tags.push(context.tags.scheduledBackward);
+      if (preset && !tiddler.getTiddlerField(utils.SRS_BACKWARD_DUE_FIELD)) {
+        fields[utils.SRS_BACKWARD_DUE_FIELD] = utils.SRS_BASE_TIME;
+        fields[utils.SRS_BACKWARD_LAST_FIELD] = utils.SRS_BASE_TIME;
+      }
     }
     if (tags.length) {
-      context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.addTagsToTiddler(tags);
+      const tiddlerTags = tiddler.getTiddlerTagsShallowCopy();
+      fields.tags = tiddlerTags.concat(utils.purgeArray(tags, tiddlerTags));
+      tiddler.doNotInvokeSequentiallyOnSameTiddler.updateTiddler(fields);
     }
   }
 
@@ -518,7 +534,7 @@ Handling SRS messages.
     const limitValue = limit ? utils.parseInteger(limit, 100) : 100;
     const groupStrategy = listProvider ? "provided" : utils.trimToUndefined(params.groupStrategy);
     const groupFilter = listProvider ? undefined : utils.trimToUndefined(params.groupFilter);
-    const groupListFilter = listProvider? undefined : utils.trimToUndefined(params.groupListFilter);
+    const groupListFilter = listProvider ? undefined : utils.trimToUndefined(params.groupListFilter);
     const groupLimit = params.groupLimit ? utils.parseInteger(params.groupLimit, 0) : 0;
     const resetAfter = params.resetAfter ? utils.parseInteger(params.resetAfter, 10) : 10;
     if (params.idle) {
