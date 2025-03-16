@@ -1,6 +1,12 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.8
+
+* added possibility to use custom data for organizing learning session (see [[here|Using Custom Data For Organizing Learning Session]] for details)
+* added a new [[SrsLearningSessionDynamicTemplate]] template that allows to mix data from different sources and different types in one learning session
+* deprecated the [[SrsLearningSessionTemplate]] template
+
 !! 0.1.7
 
 * new `taggedAny` grouping strategy (see [[here|SrsLearningSessionTemplate]] for details)

@@ -45,7 +45,7 @@ Handling SRS messages.
 
     const ProxyWiki = function (wiki) {
       return {
-        SRS_BASE_TIME: _context.wikiUtils.SRS_BASE_TIME,
+        SRS_BASE_TIME: utils.SRS_BASE_TIME,
         getTitlesWithTag: (tag) => wiki.getTiddlersWithTag(tag),
         filterTitles: (filterString) => wiki.filterTiddlers(filterString),
         allTitles: () => wiki.allTitles(),
@@ -262,7 +262,7 @@ Handling SRS messages.
     function getProvidedList(now) {
       if (!_listProvider) throw "`listProvider` should be defined";
       const answerDirections = utils.getAnswerDirections();
-      const list = _listProvider.run(new ProxyWiki(_context.wikiUtils.wiki), limit, now);
+      const list = _listProvider.run(new ProxyWiki(_context.wikiUtils.wiki), direction, limit, now);
       if (!Array.isArray(list)) {
         _context.logger.alert("'listProvider' (" + listProvider + ") should return an array");
         return;
@@ -495,11 +495,10 @@ Handling SRS messages.
       logger.alert(utils.formatString(alertMsg, "ref"));
       return;
     }
-    const groupStrategy = utils.trimToUndefined(params.groupStrategy);
     const src = utils.trimToUndefined(params.src);
     const listProvider = utils.trimToUndefined(params.listProvider);
-    if (groupStrategy === "provided") {
-      if (!listProvider || !context.env.macros[listProvider]) {
+    if (listProvider) {
+      if (!context.env.macros[listProvider]) {
         logger.alert("'listProvider' (" + listProvider + ") not found. Check if you defined the macro properly.");
         return;
       }
@@ -517,8 +516,9 @@ Handling SRS messages.
     }
     const limit = utils.trimToUndefined(params.limit);
     const limitValue = limit ? utils.parseInteger(limit, 100) : 100;
-    const groupFilter = utils.trimToUndefined(params.groupFilter);
-    const groupListFilter = utils.trimToUndefined(params.groupListFilter);
+    const groupStrategy = listProvider ? "provided" : utils.trimToUndefined(params.groupStrategy);
+    const groupFilter = listProvider ? undefined : utils.trimToUndefined(params.groupFilter);
+    const groupListFilter = listProvider? undefined : utils.trimToUndefined(params.groupListFilter);
     const groupLimit = params.groupLimit ? utils.parseInteger(params.groupLimit, 0) : 0;
     const resetAfter = params.resetAfter ? utils.parseInteger(params.resetAfter, 10) : 10;
     if (params.idle) {

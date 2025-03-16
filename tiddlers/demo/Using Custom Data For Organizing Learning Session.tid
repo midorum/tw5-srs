@@ -25,10 +25,11 @@ Produces custom data for SRS learning session
 exports.name = "YOUR_MACRO_NAME";
 exports.params = [
   {name: "wiki"},
+  {name: "direction"},
   {name: "limit"},
   {name: "time"}
 ];
-exports.run = function(wiki, limit, time) {
+exports.run = function(wiki, direction, limit, time) {
     // put your code here
     return [
         {
@@ -50,9 +51,13 @@ exports.run = function(wiki, limit, time) {
 * save the tiddler and the wiki
 * after reloading your wiki will recognize the macro and you will be able to use it in the SRS
 
+!!! Macro structure
+
 Let discuss the code above. The `exports.name` field contains the name of the macro. You can use any name you want that is legal in TiddlyWiki. Remember this name because you will use it in the SRS template.
 
-The `exports.params` field contains the list of parameters that the macro accepts. The `exports.run` function is the main function of the macro. It accepts three parameters: `wiki`, `limit` and `time`. These parameters will be filled with actual values by the SRS system. 
+The `exports.params` field contains the list of parameters that the macro accepts. The `exports.run` function is the main function of the macro. It accepts four parameters: `wiki`, `direction`, `limit` and `time`. These parameters will be filled with actual values by the SRS system. 
+
+!!! Macro parameters
 
 The `wiki` parameter is the reference to the wiki object. You can use it to get your tiddlers from the wiki. Actually it is not a real wiki object. It's rather a proxy object that provide some methods to get information from the real wiki. You cannot change the real wiki through this object. The `wiki` object has following methods and constants:
 
@@ -66,9 +71,17 @@ The `wiki` parameter is the reference to the wiki object. You can use it to get 
 * `getSrsData(titleOrTiddler)` - returns the SRS related data from the tiddler
 * `SRS_BASE_TIME` - the most minimal time value in the SRS system
 
-The `limit` parameter is the maximum number of tiddlers that should appear in the learning session. SRS passes this value directly from the `limit` attribute of the SRS template.
+The `direction` parameter is the direction of questions selected by the user. It can be one of the following values:
+
+* `forward` - the user wants to learn the information only in forward direction,
+* `backward` - the user wants to learn the information only in backward direction,
+* `both` - the user wants to learn the information in both directions.
+
+The `limit` parameter is the maximum number of tiddlers that should appear in the learning session. The SRS passes this value directly from the `limit` attribute of the SRS template.
 
 The `time` parameter is the time when a learning session is filled with new data. You will use this parameter to check if tiddlers should be included in the learning session or not.
+
+!!! Macro return value
 
 The function should return an __array of objects of special format__. Each object in the array should contain the following fields: `type`, `src`, and `direction`.
 
@@ -80,22 +93,28 @@ The `direction` field contains the direction of the question. The direction can 
 
 Pay your attention that all three attributes are required. You will get an error if you miss one of them.
 
-After you created the macro, you can use it in the SRS template. You can use the [[provided template|SrsLearningSessionTemplate]] to create a learning session like this:
+!!! Using the macro
+
+After you created the macro, you can use it in the SRS template. You can use the [[provided template|SrsLearningSessionDynamicTemplate]] to create a learning session like this:
 
 ```
 <$transclude
- $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionDynamicTemplate"
  listProvider="YOUR_MACRO_NAME"
- groupStrategy="provided"
- forwardQuestionTemplate="FORWARD_QUESTION_CARD_TEMPLATE"
- forwardAnswerTemplate="FORWARD_ANSWER_CARD_TEMPLATE"
- backwardQuestionTemplate="BACKWARD_QUESTION_CARD_TEMPLATE"
- backwardAnswerTemplate="BACKWARD_ANSWER_CARD_TEMPLATE"
 />
 ```
-Note that we use the `listProvider` attribute to specify the name of the macro. As you guess this name should be equal to the `exports.name` attribute in your macro. Also you should set the `groupStrategy` attribute to '''provided''' value. The SRS system will call the macro and use the data it returns to create the learning session.
+Note that we use the `listProvider` attribute to specify the name of the macro. As you guess this name should be equal to the `exports.name` attribute in your macro.
 
-This template contains a lot of attributes that you can use to customize the learning session. However this template does not consider different types of questions. You should create a separate template if you want to mix questions of different types in one learning session. You can use the `type` attribute of the question object to distinguish between different types of questions.
+This template contains a lot of attributes that you can use to customize the learning session.
+
+You can see a simple example of a user defined macro for gererating learning session in [[SessionDataProducer|SessionDataProducerExample]]. It has a quite primitive logic that mixes in the same session tiddlers that are tagged with `Country` or `Ocean` tag. You can use it as a starting point for your own macro. To see this example in action create a tiddler with the following content:
+
+```
+<$transclude
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionDynamicTemplate"
+ listProvider="SessionDataProducer"
+/>
+```
 
 If you want to create a lerning session by yourself, you can use the following message `tm-srs-create-session` like this:
 
@@ -103,7 +122,6 @@ If you want to create a lerning session by yourself, you can use the following m
 <$action-sendmessage
  $message="tm-srs-create-session"
  ref="TITLE_OF_THE_SESSION_TIDDLER"
- groupStrategy="provided"
  limit=100
  listProvider="TITLE_OF_YOUR_MACRO"
 />

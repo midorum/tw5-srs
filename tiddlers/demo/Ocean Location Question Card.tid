@@ -1,0 +1,17 @@
+title: Ocean Location Question Card
+type: text/vnd.tiddlywiki
+tags: $:/srs/tags/forwardQuestionCard
+srs-current-type: Ocean
+
+\parameters (
+ src,
+ random
+)
+
+Question:
+
+<h2>
+<$tiddler tiddler=<<src>>>
+Describe the location of the {{!!title}}?
+</$tiddler>
+</h2>

@@ -33,7 +33,6 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = undefined;
@@ -44,7 +43,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -67,13 +66,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return {};
                     }
                 }
@@ -84,7 +82,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -107,13 +105,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return [
                             {}
                         ];
@@ -126,7 +123,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -149,13 +146,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type"
@@ -170,7 +166,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -193,13 +189,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -215,7 +210,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -238,13 +233,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -261,7 +255,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -284,13 +278,12 @@ describe("The createSession service", () => {
                 const listProvider = "listProvider";
                 const src = undefined;
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -307,7 +300,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,
@@ -333,7 +326,6 @@ describe("The createSession service", () => {
                 const src1 = "src1";
                 const src2 = "src2";
                 const limit = undefined;
-                const groupStrategy = "provided";
                 const log = true;
                 const idle = false;
                 const src1Template = { title: "src1_scheduledForward", tags: [src1, context.tags.scheduledForward] };
@@ -341,7 +333,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, limit, time) {
+                    run: function(wiki, direction, limit, time) {
                         // wiki.getTiddlersWithTag(src1).forEach(tiddler => {
                         //     console.warn(tiddler);
                         // });
@@ -374,7 +366,7 @@ describe("The createSession service", () => {
                     direction: undefined,
                     limit: limit,
                     groupFilter: undefined,
-                    groupStrategy: groupStrategy,
+                    groupStrategy: undefined,
                     groupListFilter: undefined,
                     groupLimit: undefined,
                     resetAfter: undefined,

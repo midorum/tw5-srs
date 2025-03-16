@@ -1,0 +1,18 @@
+title: Ocean Location Backward Question Card
+type: text/vnd.tiddlywiki
+tags: $:/srs/tags/backwardQuestionCard
+srs-current-type: Ocean
+
+\parameters (
+ src,
+ random
+)
+
+Question:
+
+<h3>Which ocean has the following location?</h3>
+<h2>
+<$tiddler tiddler=<<src>>>
+{{!!location}}
+</$tiddler>
+</h2>

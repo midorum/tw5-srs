@@ -1,0 +1,13 @@
+title: Arctic Ocean
+type: text/vnd.tiddlywiki
+tags: Ocean $:/srs/tags/scheduledForward $:/srs/tags/scheduledBackward
+aria: 15,558,000 km2
+location: Between northern North America and Eurasia in the Arctic Sometimes considered a marginal sea of the Atlantic
+
+The Arctic Ocean is the smallest and shallowest of the world's five oceanic divisions. It spans an area of approximately 14,060,000 km2 (5,430,000 sq mi) and is the coldest of the world's oceans. The International Hydrographic Organization (IHO) recognizes it as an ocean, although some oceanographers call it the Arctic Mediterranean Sea. It has also been described as an estuary of the Atlantic Ocean. It is also seen as the northernmost part of the all-encompassing world ocean.
+
+Aria: {{!!aria}}
+
+Location: {{!!location}}
+
+Source: https://en.wikipedia.org/wiki/Arctic_Ocean

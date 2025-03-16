@@ -1,0 +1,13 @@
+title: Atlantic Ocean
+type: text/vnd.tiddlywiki
+tags: Ocean $:/srs/tags/scheduledForward $:/srs/tags/scheduledBackward
+aria: 85,133,000 km2
+location: Between the Americas and Europe and Africa
+
+The Atlantic Ocean is the second largest of the world's five oceanic divisions, with an area of about 85,133,000 km2 (32,870,000 sq mi). It covers approximately 17% of Earth's surface and about 24% of its water surface area. During the Age of Discovery, it was known for separating the New World of the Americas (North America and South America) from the Old World of Afro-Eurasia (Africa, Asia, and Europe). 
+
+Aria: {{!!aria}}
+
+Location: {{!!location}}
+
+Source: https://en.wikipedia.org/wiki/Atlantic_Ocean

@@ -1,6 +1,10 @@
 title: SrsLearningSessionTemplate
 type: text/vnd.tiddlywiki
 
+<div class="srs-error-box">
+This template is deprecated and will be removed in the future. Please replace it with the [[new version|SrsLearningSessionDynamicTemplate]] as soon as possible.
+</div>
+
 !! Introduction
 
 The [[$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate]] template is designed to make it easier to manage a learning session in SRS.
@@ -73,8 +77,8 @@ With custom directions buttons:
  forwardAnswerTemplate="Country Capital Answer Card"
  backwardQuestionTemplate="Capital Country Question Card"
  backwardAnswerTemplate="Capital Country Answer Card"
- directions="forward bacward"
- directionButtons="[[Study In Forward Direction]] [[Study In Bacward Direction]]"
+ directions="forward backward"
+ directionButtons="[[Study In Forward Direction]] [[Study In Backward Direction]]"
 />
 ```
 

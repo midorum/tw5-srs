@@ -1,0 +1,391 @@
+title: $:/plugins/midorum/srs/templates/SrsLearningSessionDynamicTemplate
+type: text/vnd.tiddlywiki
+
+\parameters (
+    session:"$:/temp/srs/state/session",
+    buttonsDisabledState:"$:/temp/srs/state/buttonsDisabled",
+    src,
+    listProvider,
+    groupFilter,
+    groupStrategy,
+    groupListFilter,
+    groupLimit,
+    limit:100,
+    answerLatency:1000,
+    resetAfter,
+    directions:"forward backward both",
+    directionButtons:"[[Start learn in forward direction]] [[Start learn in backward direction]] [[Start learn in both directions]]",
+    buttonClass,
+    forwardQuestionTemplate,
+    forwardAnswerTemplate,
+    backwardQuestionTemplate,
+    backwardAnswerTemplate,
+    resetButtonText:"Again ~<<format-time next-step-reset>>",
+    holdButtonText:"Hard ~<<format-time next-step-hold>>",
+    onwardButtonText:"Good ~<<format-time next-step-onward>>",
+    excludeButtonText:"Exclude",
+    answerTipText:"If it was easy - press the <code>Good</code> button. If it wasn't - press the <code>Hard</code> button. If you couldn't remember - press the <code>Again</code> button.",
+    log
+)
+
+\procedure srs-no-session-actions()
+\define create-session-action(direction)
+<$action-sendmessage
+ $message="tm-srs-create-session"
+ ref=<<session>>
+ src=<<src>>
+ groupFilter=<<groupFilter>>
+ groupStrategy=<<groupStrategy>>
+ groupListFilter=<<groupListFilter>>
+ groupLimit=<<groupLimit>>
+ direction="$direction$"
+ limit=<<limit>>
+ resetAfter=<<resetAfter>>
+ listProvider=<<listProvider>>
+ log=<<log>>
+/><$action-setfield
+ $tiddler=<<session>>
+ $index="showAnswer"
+ $value=""
+/><$action-setfield
+ $tiddler=<<session>>
+ $index="random"
+ $value=<<srs-generate-random>>
+/><$action-setfield
+ $tiddler=<<buttonsDisabledState>>
+ text="yes"
+/>
+\end create-session-action
+<$list
+ filter="[enlist<directions>]"
+ counter=c
+><$button
+ actions="""
+ <$transclude
+  $variable="create-session-action"
+  direction=<<currentTiddler>>
+ />
+ """
+ class=<<buttonClass>>
+><$list
+ filter="[enlist<directionButtons>nth<c>]"
+><$text
+ text=<<currentTiddler>>
+/></$list>
+</$button></$list><hr><$text
+ text="There are currently no flashcards to study. Try to create a new training session by clicking the button above, or take a break."
+/>
+\end srs-no-session-actions
+
+\procedure srs-session-info()
+\procedure info-text()
+<$text
+ text="session direction: "
+/><$transclude
+ $tiddler=<<session>>
+ $index="direction"
+/>&#10;<$text
+ text="current: "
+/><$transclude
+ $variable="current-src"
+/>&#10;<$text
+ text="current direction: "
+/><$transclude
+ $variable="current-direction"
+/>&#10;<$text
+ text="random: "
+/><$transclude
+ $tiddler=<<session>>
+ $index="random"
+/>
+\end info-text
+<$wikify
+ name=wikified
+ text=<<info-text>>
+><span 
+ title=<<wikified>>
+ class="srs-learning-session-form-icon"
+><$transclude
+ $tiddler="$:/core/images/info-button"
+ size="18"
+/></span></$wikify>
+\end srs-session-info
+
+\procedure srs-session-counters()
+<div><$transclude
+ $variable=srs-session-info
+ $mode=inline
+/><span
+ style="color: #129099"
+><$list
+ filter="[<session>getindex[counter-newcomer]]"
+><$transclude
+ $variable=currentTiddler
+/></$list></span>&nbsp;+&nbsp;<span
+ style="color: #c65364"
+><$list
+ filter="[<session>getindex[counter-repeat]]"
+><$transclude
+ $variable=currentTiddler
+/></$list></span>&nbsp;+&nbsp;<span
+ style="color: #279627"
+><$list
+ filter="[<session>getindex[counter-overdue]]"
+><$transclude
+ $variable=currentTiddler
+/></$list></span></div><div><$list
+ filter="[<session>getindex[current-due]format:timestamp[YY/0MM/0DD 0hh:0mm]]"
+>This question was scheduled for: <$text
+ text=<<currentTiddler>>
+/></$list></div><div><$reveal
+ type="match"
+ stateTitle=<<session>>
+ stateIndex="current-due"
+ text=""
+><$text
+ text="This is a new question for you. Good luck!"
+/></$reveal></div><div><$list
+ filter="[<session>getindex[estimatedEndTime]format:timestamp[YY/0MM/0DD 0hh:0mm]]"
+>Estimated session end time: <$text
+ text=<<currentTiddler>>
+/></$list></div>
+\end srs-session-counters
+
+\procedure srs-session-actions()
+\procedure format-time(index)
+<$list
+ filter="[<session>getindex<index>srs:gtu[]]"
+><<currentTiddler>></$list>
+\end format-time
+\procedure show-answer-action()
+<$action-setfield
+ $tiddler=<<session>>
+ $index="showAnswer"
+ $value="yes"
+/><$srs-action-setfield-deferred
+ $tiddler=<<buttonsDisabledState>>
+$defer=<<answerLatency>>
+ text="no"
+/>
+\end show-answer-action
+\define commit-answer-action(answer)
+<$action-sendmessage
+ $message="tm-srs-commit-answer"
+ ref=<<session>>
+ answer="$answer$"
+ log=<<log>>
+/><$action-setfield
+ $tiddler=<<session>>
+ $index="showAnswer"
+/><$action-setfield
+ $tiddler=<<session>>
+ $index="random"
+ $value=<<srs-generate-random>>
+/><$action-setfield
+ $tiddler=<<buttonsDisabledState>>
+ text="yes"
+/>
+\end commit-answer-action
+\procedure exclude-question-action()
+<$action-confirm
+ $message="Do you wish to exclude this question from the SRS? You can always include it back manually."
+><$transclude
+ $variable="commit-answer-action"
+ answer="exclude"
+/></$action-confirm>
+\end exclude-question-action
+\procedure end-session-action()
+<$action-sendmessage
+ $message="tm-srs-delete-session"
+ ref=<<session>>
+ answer="$answer$"
+/><$action-deletetiddler
+ $tiddler=<<session>>
+/><$action-deletetiddler
+ $tiddler=<<buttonsDisabledState>>
+/>
+\end end-session-action
+\procedure clock-icon()
+<span
+ class="srs-learning-session-form-icon"
+><$reveal
+ type="match"
+ stateTitle=<<buttonsDisabledState>>
+ stateField="text"
+ text="yes"
+><$transclude
+ $tiddler="$:/core/images/timestamp-on"
+ size="18"
+/></$reveal><$reveal
+ type="nomatch"
+ stateTitle=<<buttonsDisabledState>>
+ stateField="text"
+ text="yes"
+><$transclude
+ $tiddler="$:/core/images/blank"
+ size="18"
+/></$reveal></span>
+\end clock-icon
+<$reveal
+ type="nomatch"
+ stateTitle=<<session>>
+ stateIndex="showAnswer"
+ text="yes"
+>
+<$button
+ actions=<<show-answer-action>>
+ class=<<buttonClass>>
+>Show answer</$button>
+</$reveal><$reveal
+ type="match"
+ stateTitle=<<session>>
+ stateIndex="showAnswer"
+ text="yes"
+><$transclude
+ $variable="clock-icon"
+ $mode=inline
+/>
+<span><$set
+ name=disabled
+ tiddler=<<buttonsDisabledState>>
+ field="text"
+><$button
+ actions=<<commit-answer-action answer:"reset">>
+ disabled=<<disabled>>
+ class=<<buttonClass>>
+><$transclude
+ $variable=resetButtonText
+/></$button><$button
+ actions=<<commit-answer-action answer:"hold">>
+ disabled=<<disabled>>
+ class=<<buttonClass>>
+><$transclude
+ $variable=holdButtonText
+/></$button><$button
+ actions=<<commit-answer-action answer:"onward">>
+ disabled=<<disabled>>
+ class=<<buttonClass>>
+><$transclude
+ $variable=onwardButtonText
+/></$button></$set></span>
+</$reveal>
+<span
+ style="float:right"
+><$button
+ actions=<<exclude-question-action>>
+ class=<<buttonClass>>
+><$transclude
+ $variable=excludeButtonText
+/></$button><$button
+ actions=<<end-session-action>>
+ class=<<buttonClass>>
+>End session</$button></span>
+\end srs-session-actions
+
+\procedure srs-session-answer-tip()
+<span
+ class="srs-learning-session-form-icon"
+><$transclude
+ $tiddler="$:/core/images/info-button"
+ size="18"
+ $mode=inline
+/></span><$transclude
+ $variable="answerTipText"
+ $mode=inline
+/>
+\end srs-session-answer-tip
+
+<!------------- content ------------->
+<section
+ class="srs-learning-session-form"
+><$list
+ filter="[<session>is[missing]] ~[<session>getindex[current-src]else[missed]compare:string:eq[missed]]"
+><$transclude
+ $variable="srs-no-session-actions"
+ $mode=block
+/></$list><$list
+ variable="current-direction"
+ filter="[<session>getindex[current-direction]]"
+><$list
+ variable="current-type"
+ filter="[<session>getindex[current-type]] ~[<src>]"
+><$list
+ variable="current-src"
+ filter="[<session>getindex[current-src]]"
+><$set
+ name=random
+ tiddler=<<session>>
+ index="random"
+><table
+ class="srs-learning-session-form-actions-table"
+><tr><td><$transclude
+ $variable="srs-session-counters"
+/></td><td><$transclude
+ $variable="srs-session-actions"
+/></td></tr></table><hr><$list
+ filter="[<current-direction>compare:string:eq[forward]]"
+><$list
+ variable="questionCard"
+ filter="[tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<questionCard>>
+ src=<<current-src>>
+ random=<<random>>
+/><$reveal
+ type="match"
+ stateTitle=<<session>>
+ stateIndex="showAnswer"
+ text="yes"
+><hr><$list
+ variable="answerCard"
+ filter="[tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<answerCard>>
+ src=<<current-src>>
+ random=<<random>>
+/></$list><$list
+ filter="[tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
+</$list></$reveal></$list><$list
+ filter="[tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any question card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
+</$list></$list><$list
+ filter="[<current-direction>compare:string:eq[backward]]"
+><$list
+ variable="questionCard"
+ filter="[tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<questionCard>>
+ src=<<current-src>>
+ random=<<random>>
+/><$reveal
+ type="match"
+ stateTitle=<<session>>
+ stateIndex="showAnswer"
+ text="yes"
+><hr><$list
+ variable="answerCard"
+ filter="[tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<answerCard>>
+ src=<<current-src>>
+ random=<<random>>
+/></$list><$list
+ filter="[tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
+</$list></$reveal></$list><$list
+ filter="[tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any question card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
+</$list></$list><$reveal
+ type="match"
+ stateTitle=<<session>>
+ stateIndex="showAnswer"
+ text="yes"
+><$transclude
+ $variable="srs-session-answer-tip"
+ $mode=block
+/></$reveal></$set></$list></$list></$list></section>
