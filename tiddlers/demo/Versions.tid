@@ -8,6 +8,7 @@ type: text/vnd.tiddlywiki
 * deprecated the [[SrsLearningSessionTemplate]] template
 * optionally preset SRS related fields when scheduling a tiddler (to make this done set the `preset` param for `tm-srs-schedule` message to `true`)
 * update SRS related fields on associated tiddlers by a filter expression while commiting the user answer (see [[here|Commiting Answer for Associated Tiddlers]] for details)
+* added a new session option `newFirst` which allows to see new tiddlers before overdue ones in the learning session (by default overdue tiddlers have a precedence)
 
 !! 0.1.7
 

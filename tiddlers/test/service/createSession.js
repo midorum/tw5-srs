@@ -259,4 +259,112 @@ describe("The createSession service", () => {
             expect(sessionData["counter-newcomer"]).toEqual(1);
         })
 
+    it("should create a new session"
+        + " and schedule an overdue tiddler to learn"
+        + " when the `newFirst` parameter is not set", () => {
+            // console.warn(">>>");
+            const options = utils.setupWiki();
+            const context = utils.getSrsContext();
+            const ref = "$:/temp/srs/session";
+            const src = "some tag";
+            const direction = "both";
+            const limit = undefined;
+            const groupFilter = undefined;
+            const groupStrategy = undefined;
+            const newFirst = undefined;
+            const log = true;
+            const idle = false;
+            const overdueTiddlerTemplate = { 
+                title: "overdueTiddler", 
+                tags: [src, context.tags.scheduledForward] ,
+                'srs-forward-due': new Date().getTime(),
+                'srs-forward-last': new Date().getTime()
+            };
+            const newTiddlerTemplate = { title: "newTiddler", tags: [src, context.tags.scheduledBackward] };
+            options.widget.wiki.addTiddler(overdueTiddlerTemplate);
+            options.widget.wiki.addTiddler(newTiddlerTemplate);
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                newFirst: newFirst,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            const sessionInstance = options.widget.wiki.getTiddler(ref);
+            // console.warn(sessionInstance);
+            expect(sessionInstance).toBeDefined();
+            const sessionData = JSON.parse(sessionInstance.fields.text);
+            expect(sessionData).toBeDefined();
+            expect(sessionData.src).toEqual(src);
+            expect(sessionData.direction).toEqual(direction);
+            expect(sessionData["current-src"]).toEqual(overdueTiddlerTemplate.title);
+            expect(sessionData["counter-repeat"]).toEqual(0);
+            expect(sessionData["counter-overdue"]).toEqual(0);
+            expect(sessionData["counter-newcomer"]).toEqual(1);
+        })
+
+    it("should create a new session"
+        + " and schedule a new tiddler to learn"
+        + " when the `newFirst` parameter is set", () => {
+            // console.warn(">>>");
+            const options = utils.setupWiki();
+            const context = utils.getSrsContext();
+            const ref = "$:/temp/srs/session";
+            const src = "some tag";
+            const direction = "both";
+            const limit = undefined;
+            const groupFilter = undefined;
+            const groupStrategy = undefined;
+            const newFirst = true;
+            const log = true;
+            const idle = false;
+            const overdueTiddlerTemplate = { 
+                title: "overdueTiddler", 
+                tags: [src, context.tags.scheduledForward] ,
+                'srs-forward-due': new Date().getTime(),
+                'srs-forward-last': new Date().getTime()
+            };
+            const newTiddlerTemplate = { title: "newTiddler", tags: [src, context.tags.scheduledBackward] };
+            options.widget.wiki.addTiddler(overdueTiddlerTemplate);
+            options.widget.wiki.addTiddler(newTiddlerTemplate);
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                newFirst: newFirst,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(params, options.widget)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            const sessionInstance = options.widget.wiki.getTiddler(ref);
+            // console.warn(sessionInstance);
+            expect(sessionInstance).toBeDefined();
+            const sessionData = JSON.parse(sessionInstance.fields.text);
+            expect(sessionData).toBeDefined();
+            expect(sessionData.src).toEqual(src);
+            expect(sessionData.direction).toEqual(direction);
+            expect(sessionData["current-src"]).toEqual(newTiddlerTemplate.title);
+            expect(sessionData["counter-repeat"]).toEqual(0);
+            expect(sessionData["counter-overdue"]).toEqual(1);
+            expect(sessionData["counter-newcomer"]).toEqual(0);
+        })
+
 });

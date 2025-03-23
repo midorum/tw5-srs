@@ -13,6 +13,7 @@ type: text/vnd.tiddlywiki
     limit:100,
     answerLatency:1000,
     resetAfter,
+    newFirst,
     directions:"forward backward both",
     directionButtons:"[[Start learn in forward direction]] [[Start learn in backward direction]] [[Start learn in both directions]]",
     buttonClass,
@@ -41,6 +42,7 @@ type: text/vnd.tiddlywiki
  direction="$direction$"
  limit=<<limit>>
  resetAfter=<<resetAfter>>
+ newFirst=<<newFirst>>
  listProvider=<<listProvider>>
  log=<<log>>
 /><$action-setfield
