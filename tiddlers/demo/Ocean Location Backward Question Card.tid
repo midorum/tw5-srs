@@ -1,7 +1,7 @@
-title: Capital Country Question Card
+title: Ocean Location Backward Question Card
 type: text/vnd.tiddlywiki
 tags: $:/srs/tags/backwardQuestionCard
-srs-current-type: Country
+srs-current-type: Ocean
 
 \parameters (
  src,
@@ -10,8 +10,9 @@ srs-current-type: Country
 
 Question:
 
+<h3>Which ocean has the following location?</h3>
 <h2>
 <$tiddler tiddler=<<src>>>
-The capital of which country is {{!!capital}}?
+{{!!location}}
 </$tiddler>
 </h2>

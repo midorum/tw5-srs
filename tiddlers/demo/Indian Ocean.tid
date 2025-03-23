@@ -1,0 +1,13 @@
+title: Indian Ocean
+type: text/vnd.tiddlywiki
+tags: Ocean $:/srs/tags/scheduledForward $:/srs/tags/scheduledBackward
+aria: 70,560,000 km2
+location: Between southern Asia, Africa and Australia
+
+The Indian Ocean is the third-largest of the world's five oceanic divisions, covering 70,560,000 km2 (27,240,000 sq mi) or approximately 20% of the water area of Earth's surface. It is bounded by Asia to the north, Africa to the west and Australia to the east. To the south it is bounded by the Southern Ocean, or Antarctica, depending on the definition in use. The Indian Ocean has large marginal, or regional seas, such as the Andaman Sea, the Arabian Sea, the Bay of Bengal, and the Laccadive Sea. 
+
+Aria: {{!!aria}}
+
+Location: {{!!location}}
+
+Source: https://en.wikipedia.org/wiki/Indian_Ocean

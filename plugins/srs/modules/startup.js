@@ -24,7 +24,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-schedule", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.schedule(params.ref, params.direction, params.idle, widget);
+      messageHandler.schedule(params.ref, params.direction, params.preset, params.idle, widget);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-unschedule", function (event) {
@@ -36,7 +36,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-create-session", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.createSession(params, widget);
+      messageHandler.createSession(params, widget, $tw);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-delete-session", function (event) {
@@ -48,7 +48,7 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-commit-answer", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.commitAnswer(params.ref, params.answer, params.log, params.idle, widget);
+      messageHandler.commitAnswer(params.ref, params.answer, params.updateRelated, params.log, params.idle, widget);
     });
 
   };

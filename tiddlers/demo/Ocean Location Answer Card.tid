@@ -1,7 +1,7 @@
-title: Country Capital Answer Card
+title: Ocean Location Answer Card
 type: text/vnd.tiddlywiki
 tags: $:/srs/tags/forwardAnswerCard
-srs-current-type: Country
+srs-current-type: Ocean
 srs-answer-related-filter: [tag[RelatedConcept1]tag<currentTiddler>] [<currentTiddler>tags[]tag[RelatedConcept2]]
 
 \parameters (
@@ -13,6 +13,6 @@ Answer:
 
 <h2>
 <$tiddler tiddler=<<src>>>
-The capital of {{!!title}} is {{!!capital}}
+The location of the {{!!title}} is {{!!location}}.
 </$tiddler>
 </h2>

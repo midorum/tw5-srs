@@ -27,3 +27,21 @@ table.srs-learning-session-form-actions-table {
 table.srs-learning-session-form-actions-table td {
  border: none;
 }
+
+.srs-error-box {
+ border: 1px solid #ff0000;
+ padding: 5px;
+ border-radius: 10px;
+}
+
+.srs-warning-box {
+ border: 1px solid #ffff00;
+ padding: 5px;
+ border-radius: 10px;
+}
+
+.srs-info-box {
+ border: 1px solid #00ff00;
+ padding: 5px;
+ border-radius: 10px;
+}

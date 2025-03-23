@@ -22,6 +22,7 @@ const SRS_ANSWER_RESET = "reset";
 const SRS_ANSWER_HOLD = "hold";
 const SRS_ANSWER_ONWARD = "onward";
 const SRS_ANSWER_EXCLUDE = "exclude";
+const SRS_BASE_TIME = new Date(2000, 0, 1).getTime();
 
 const SUPPORTED_DIRECTIONS = [FORWARD_DIRECTION, BACKWARD_DIRECTION, BOTH_DIRECTION];
 const ANSWER_DIRECTIONS = [FORWARD_DIRECTION, BACKWARD_DIRECTION];
@@ -226,6 +227,7 @@ exports.srsUtils = {
   SRS_ANSWER_HOLD: SRS_ANSWER_HOLD,
   SRS_ANSWER_ONWARD: SRS_ANSWER_ONWARD,
   SRS_ANSWER_EXCLUDE: SRS_ANSWER_EXCLUDE,
+  SRS_BASE_TIME: SRS_BASE_TIME,
   trimToUndefined: trimToUndefined,
   parseJsonOrUndefined: parseJsonOrUndefined,
   parseInteger: parseInteger,

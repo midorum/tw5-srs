@@ -1,13 +1,7 @@
-created: 20240517060604838
-modified: 20240517190414399
 title: Learning Session Example
 type: text/vnd.tiddlywiki
 
 <$transclude
- $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate"
+ $tiddler="$:/plugins/midorum/srs/templates/SrsLearningSessionDynamicTemplate"
  src="Country"
- forwardQuestionTemplate="Country Capital Question Card"
- forwardAnswerTemplate="Country Capital Answer Card"
- backwardQuestionTemplate="Capital Country Question Card"
- backwardAnswerTemplate="Capital Country Answer Card"
 />

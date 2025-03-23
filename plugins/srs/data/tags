@@ -1,2 +1,6 @@
 scheduledForward:$:/srs/tags/scheduledForward
 scheduledBackward:$:/srs/tags/scheduledBackward
+forwardQuestionCard:$:/srs/tags/forwardQuestionCard
+forwardAnswerCard:$:/srs/tags/forwardAnswerCard
+backwardQuestionCard:$:/srs/tags/backwardQuestionCard
+backwardAnswerCard:$:/srs/tags/backwardAnswerCard

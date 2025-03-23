@@ -1,0 +1,26 @@
+title: Commiting Answer for Associated Tiddlers
+type: text/vnd.tiddlywiki
+
+It often happens that one question tests knowledge of several concepts that are related to each other but stored in different places (tiddlers). For example, if you are learning a foreign language you may have a certain set of words to learn. You also have a concept of grammar rules that determine the construction of correct sentences. All these are different concepts, but they are all combined together in a phrase (sentence) expressing a certain thought. In other words, it is impossible to make a correct sentence without knowing the meanings of words and grammar rules. Thus, asking a question about the correctness of a certain phrase (sentence) tests knowledge of several concepts stored in different places. So if a person correctly makes a phrase in the language being studied, it means that he knows both the meanings of the words used and the grammar rules. In such cases, it is quite appropriate to mark all concepts related to the question as passed (known to the user). This will avoid unnecessary repetition of well-known concepts and focus on learning new ones.
+
+The SRS system provides a means for this. At a low level, this is implemented by passing an additional attribute to the `tm-srs-commit-answer` message. This message commits the user's answer to the current question in the learning session. By default, this message creates or modifies special fields in the tiddler containing the question that store the time of the last answer and the time of the next question for the given learning direction. By passing an additional attribute `updateRelated` to this message, which contains a filter, one can force the system to mark as passed all tiddlers that satisfy this filter. This allows all concepts related to the question to be automatically marked as passed. For example, if a question tests the learner's ability to correctly construct sentences in a foreign language, the filter passed to the message will select all tiddlers containing words from the sentence, as well as grammar rules related to this sentence.
+
+Note that this action is not performed if the user's answer is `reset` or `exclude`. This is because with these answers it is not possible to infer the user's knowledge of the related concepts.
+
+!!! Example of a filter for finding associated tiddlers
+
+Let's say we have tiddlers containing words and grammar rules. Words are tagged with the `Word` tag, and grammar rules are tagged with the `GrammarRule` tag. We also have a tiddler containing a question about the correctness of a phrase in a foreign language. Also, to simplify things, let's imagine that the tiddler of each word included in the example is tagged with the tag of that example, and the tiddler of the example is tagged with the tags of all grammar rules applied to it. Then the filter for finding all related tiddlers might look like this:
+
+```
+[tag[Word]tag<currentTiddler>] [<currentTiddler>tags[]tag[GrammarRule]]
+```
+* the first part of the filter `[tag[Word]tag<currentTiddler>]` finds all tiddlers marked with the tag `Word` and the tag of the current tiddler (i.e. the tiddler with the question).
+* the second part of the filter `[<currentTiddler>tags[]tag[GrammarRule]]` finds all tags of the current tiddler (i.e. the tiddler with the question) and selects only those that are additionally marked with the tag `GrammarRule`. This allows to find all grammar rules associated with the example.
+* note that the tiddler containing the currently asked question is marked with a special syntax `<currentTiddler>`. The SRS system automatically replaces this value with the name of the current tiddler.
+* also note the space between the two parts of the filter. This is a so-called [[multi-run|https://groktiddlywiki.com/read/#Multi-Run%20Filters]] filter. It allows you to combine the results of two parts of a filter into one list.
+
+You can read more about using filters in TiddlyWiki in the [[official documentation|https://tiddlywiki.com/#Filters]], as well as in this detailed [[guide|https://groktiddlywiki.com/read/#Filters]].
+
+!!! Where to put the filter to make it work
+
+As mentioned above, you can pass the filter directly in the `tm-srs-commit-answer` message when committing the answer to the current question. If you are using the [[built-in|SrsLearningSessionDynamicTemplate]] or your own template for managing the learning session, this may be inconvenient. In this case, you have to place the filter in the `srs-answer-related-filter` field in the answer card tiddler. The SRS system will automatically read this field and pass the filter to the learning session along with the question itself (in the `current-answer-related-filter` attribute), and from there the filter can be taken to be passed in the message when committing the answer. The built-in template does this automatically. You can see how this done in [[this|Country Capital Answer Card]] example card.

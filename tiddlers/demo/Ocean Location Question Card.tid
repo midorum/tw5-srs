@@ -1,7 +1,7 @@
-title: Country Capital Question Card
+title: Ocean Location Question Card
 type: text/vnd.tiddlywiki
 tags: $:/srs/tags/forwardQuestionCard
-srs-current-type: Country
+srs-current-type: Ocean
 
 \parameters (
  src,
@@ -12,6 +12,6 @@ Question:
 
 <h2>
 <$tiddler tiddler=<<src>>>
-What is the capital of {{!!title}}?
+Describe the location of the {{!!title}}?
 </$tiddler>
 </h2>

@@ -1,7 +1,9 @@
-created: 20240517105618962
-modified: 20240517144456645
 title: SrsLearningSessionTemplate
 type: text/vnd.tiddlywiki
+
+<div class="srs-error-box">
+This template is deprecated and will be removed in the future. Please replace it with the [[new version|SrsLearningSessionDynamicTemplate]] as soon as possible.
+</div>
 
 !! Introduction
 
@@ -22,6 +24,7 @@ The [[$:/plugins/midorum/srs/templates/SrsLearningSessionTemplate]] template is 
 |!groupListFilter | no |filter that gives a list of groups containing learning tiddlers |
 |!groupLimit | no |maximum tiddlers in each group in `groupListFilter` (0 = no limit)|
 |!resetAfter | no |time in minutes when the session will be refilled with new content (10 - by default; 0 - no refill; -1 - auto refill when the session becomes empty)|
+|!listProvider | no |[[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that provides a custom list of tiddlers for the learning session (see [[here|Using Custom Data For Organizing Learning Session]] for more information) |
 |!limit | no |limiting the number of tiddlers for one session (by default 100) |
 |!answerLatency | no |delay before the answer rating buttons become active in milliseconds (by default 1000 =1sec) |
 |!directions | no |list of possible directions for learning (by default "forward backward both") |
@@ -47,6 +50,7 @@ Possible values for `groupStrategy` attribute:
 |!oneFromGroup |only one tiddler will be taken for each group, specified in `groupFilter` |
 |!nFromGroup |only tiddlers in each group returned by `groupListFilter` limited by `groupLimit` |
 |!taggedAny |only tiddlers that has tags returned by `groupListFilter` limited by `groupLimit`. This strategy is much faster than other ones and does not require `groupFilter` parameter |
+|!provided |user provides the own way to select tiddlers for organizing a learning session (see [[here|Using Custom Data For Organizing Learning Session]] for more information) |
 
 !! Examples
 
@@ -73,8 +77,8 @@ With custom directions buttons:
  forwardAnswerTemplate="Country Capital Answer Card"
  backwardQuestionTemplate="Capital Country Question Card"
  backwardAnswerTemplate="Capital Country Answer Card"
- directions="forward bacward"
- directionButtons="[[Study In Forward Direction]] [[Study In Bacward Direction]]"
+ directions="forward backward"
+ directionButtons="[[Study In Forward Direction]] [[Study In Backward Direction]]"
 />
 ```
 

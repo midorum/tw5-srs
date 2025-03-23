@@ -30,6 +30,7 @@ describe("The two-factor-linear strategy", () => {
             const srcTag = "some tag";
             const direction = "both";
             const answer = "onward";
+            const relatedFilter = undefined;
             const log = undefined;
             const idle = false;
             const scheduledForwardTitle = "scheduledForward";
@@ -72,7 +73,7 @@ describe("The two-factor-linear strategy", () => {
             expect(messageHandler.createSession(params, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
-            expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, expectedNextTimeMin, expectedNextTimeMax, options);
         })
@@ -85,6 +86,7 @@ describe("The two-factor-linear strategy", () => {
             const srcTag = "some tag";
             const direction = "both";
             const answer = "onward";
+            const relatedFilter = undefined;
             const log = undefined;
             const idle = false;
             const scheduledForwardTitle = "scheduledForward";
@@ -127,7 +129,7 @@ describe("The two-factor-linear strategy", () => {
             expect(messageHandler.createSession(params, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked", firstAsked)
-            expect(messageHandler.commitAnswer(ref, answer, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, templateMap, expectedNextTimeMin, expectedNextTimeMax, options);
         })

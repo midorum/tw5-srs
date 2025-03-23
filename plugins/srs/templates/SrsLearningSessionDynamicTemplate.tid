@@ -1,10 +1,11 @@
-title: $:/plugins/midorum/srs/templates/SrsLearningSessionTemplate
+title: $:/plugins/midorum/srs/templates/SrsLearningSessionDynamicTemplate
 type: text/vnd.tiddlywiki
 
 \parameters (
     session:"$:/temp/srs/state/session",
     buttonsDisabledState:"$:/temp/srs/state/buttonsDisabled",
     src,
+    listProvider,
     groupFilter,
     groupStrategy,
     groupListFilter,
@@ -12,7 +13,7 @@ type: text/vnd.tiddlywiki
     limit:100,
     answerLatency:1000,
     resetAfter,
-    listProvider,
+    newFirst,
     directions:"forward backward both",
     directionButtons:"[[Start learn in forward direction]] [[Start learn in backward direction]] [[Start learn in both directions]]",
     buttonClass,
@@ -41,6 +42,7 @@ type: text/vnd.tiddlywiki
  direction="$direction$"
  limit=<<limit>>
  resetAfter=<<resetAfter>>
+ newFirst=<<newFirst>>
  listProvider=<<listProvider>>
  log=<<log>>
 /><$action-setfield
@@ -92,6 +94,10 @@ type: text/vnd.tiddlywiki
  text="current direction: "
 /><$transclude
  $variable="current-direction"
+/>&#10;<$text
+ text="current type: "
+/><$transclude
+ $variable="current-type"
 />&#10;<$text
  text="random: "
 /><$transclude
@@ -173,6 +179,7 @@ $defer=<<answerLatency>>
  $message="tm-srs-commit-answer"
  ref=<<session>>
  answer="$answer$"
+ updateRelated=<<current-answer-related-filter>>
  log=<<log>>
 /><$action-setfield
  $tiddler=<<session>>
@@ -231,8 +238,7 @@ $defer=<<answerLatency>>
  stateTitle=<<session>>
  stateIndex="showAnswer"
  text="yes"
->
-<$button
+><$button
  actions=<<show-answer-action>>
  class=<<buttonClass>>
 >Show answer</$button>
@@ -307,8 +313,15 @@ $defer=<<answerLatency>>
  variable="current-direction"
  filter="[<session>getindex[current-direction]]"
 ><$list
+ variable="current-type"
+ filter="[<session>getindex[current-type]] ~[<src>]"
+><$list
  variable="current-src"
  filter="[<session>getindex[current-src]]"
+><$set
+ name="current-answer-related-filter"
+ filter="[<session>getindex[current-answer-related-filter]]"
+ select="0"
 ><$set
  name=random
  tiddler=<<session>>
@@ -321,8 +334,11 @@ $defer=<<answerLatency>>
  $variable="srs-session-actions"
 /></td></tr></table><hr><$list
  filter="[<current-direction>compare:string:eq[forward]]"
+><$list
+ variable="questionCard"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
- $tiddler=<<forwardQuestionTemplate>>
+ $tiddler=<<questionCard>>
  src=<<current-src>>
  random=<<random>>
 /><$reveal
@@ -330,14 +346,28 @@ $defer=<<answerLatency>>
  stateTitle=<<session>>
  stateIndex="showAnswer"
  text="yes"
-><hr><$transclude
- $tiddler=<<forwardAnswerTemplate>>
+><hr><$list
+ variable="answerCard"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<answerCard>>
  src=<<current-src>>
  random=<<random>>
-/></$reveal></$list><$list
+/></$list><$list
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
+</$list></$reveal></$list><$list
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/forwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any question card template for the source <code><<current-type>></code> in the <code>forward</code> direction. Please check if you defined it properly.
+</$list></$list><$list
  filter="[<current-direction>compare:string:eq[backward]]"
+><$list
+ variable="questionCard"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>last[]]"
 ><$transclude
- $tiddler=<<backwardQuestionTemplate>>
+ $tiddler=<<questionCard>>
  src=<<current-src>>
  random=<<random>>
 /><$reveal
@@ -345,11 +375,22 @@ $defer=<<answerLatency>>
  stateTitle=<<session>>
  stateIndex="showAnswer"
  text="yes"
-><hr><$transclude
- $tiddler=<<backwardAnswerTemplate>>
+><hr><$list
+ variable="answerCard"
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>last[]]"
+><$transclude
+ $tiddler=<<answerCard>>
  src=<<current-src>>
  random=<<random>>
-/></$reveal></$list><$reveal
+/></$list><$list
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardAnswerCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any answer card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
+</$list></$reveal></$list><$list
+ filter="[all[shadows+tiddlers]tag[$:/srs/tags/backwardQuestionCard]field:srs-current-type<current-type>count[]compare:integer:eq[0]]"
+>
+I couldn't find any question card template for the source <code><<current-type>></code> in the <code>backward</code> direction. Please check if you defined it properly.
+</$list></$list><$reveal
  type="match"
  stateTitle=<<session>>
  stateIndex="showAnswer"
@@ -357,4 +398,4 @@ $defer=<<answerLatency>>
 ><$transclude
  $variable="srs-session-answer-tip"
  $mode=block
-/></$reveal></$set></$list></$list></section>
+/></$reveal></$set></$set></$list></$list></$list></section>

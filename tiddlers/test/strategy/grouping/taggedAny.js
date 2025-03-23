@@ -40,6 +40,7 @@ describe("The createSession service", () => {
                 const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = 2; // two items from each group
+                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -71,7 +72,7 @@ describe("The createSession service", () => {
                 while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
-                    expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 }
                 expect(askedMap[group1]).toEqual(2);
                 expect(askedMap[group2]).toEqual(2);
@@ -96,6 +97,7 @@ describe("The createSession service", () => {
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = undefined; // no limit
                 // const groupLimit = 0; // no limit
+                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -129,7 +131,7 @@ describe("The createSession service", () => {
                 while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
-                    expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 }
                 expect(askedMap[group1]).toEqual(5);
                 expect(askedMap[group2]).toEqual(5);
@@ -153,6 +155,7 @@ describe("The createSession service", () => {
                 const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = undefined; // no limit
+                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers_sameTiddlerInEachGroup(src, [group1, group2], options, context);
@@ -191,7 +194,7 @@ describe("The createSession service", () => {
                         expectedRepeatTiddlers++;
                         if (expectedNewComerTiddlers > 0) expectedNewComerTiddlers--;
                     }
-                    expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                     asked = verifySession(ref, src, direction, expectedRepeatTiddlers, expectedNewComerTiddlers, 0, options);
                 } while (asked.src)
                 expect(expectedTiddlersCount).toEqual(actualTiddlersCount);

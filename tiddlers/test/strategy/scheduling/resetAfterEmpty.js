@@ -36,6 +36,7 @@ describe("The commitAnswer service", () => {
             const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
             const groupFilter = "[<currentTiddler>tag<groupTitle>]"; // take item if it has apropriate group tag
             const groupLimit = 2; // two items from each group
+            const relatedFilter = undefined;
             const log = true;
             const idle = false;
             const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -69,7 +70,7 @@ describe("The commitAnswer service", () => {
                 if (asked.src) {
                     actualTiddlersCount++;
                 }
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 asked = verifySession(ref, src, direction, options);
             } while (asked.src)
             expect(expectedTiddlersCount).toEqual(actualTiddlersCount);
@@ -90,6 +91,7 @@ describe("The commitAnswer service", () => {
             const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
             const groupFilter = "[<currentTiddler>tag<groupTitle>]"; // take item if it has apropriate group tag
             const groupLimit = 2; // two items from each group
+            const relatedFilter = undefined;
             const log = true;
             const idle = false;
             const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -123,7 +125,7 @@ describe("The commitAnswer service", () => {
                 if (asked.src) {
                     actualTiddlersCount++;
                 }
-                expect(messageHandler.commitAnswer(ref, "onward", log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
                 asked = verifySession(ref, src, direction, options);
             } while (asked.src)
             expect(expectedTiddlersCount).toEqual(actualTiddlersCount);
