@@ -9,6 +9,8 @@ Unit tests for the commitAnswer service.
 const utils = require("test/utils");
 const messageHandler = require("$:/plugins/midorum/srs/modules/message-handler.js");
 const Logger = $tw.utils.Logger.prototype;
+const offset_24h = 1000 * 60 * 60 * 24;
+const offset_1y = offset_24h * 365;
 
 describe("The commitAnswer service", () => {
     var consoleSpy;
@@ -462,7 +464,7 @@ describe("The commitAnswer service", () => {
         })
 
     it("should update SRS fields in source (asked) tiddler"
-        + "but shouldn't increase the tiddler current step if answer time is before due date", () => {
+        + " but shouldn't increase the tiddler current step if answer time is before due date", () => {
             // console.warn(">>>");
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
@@ -470,16 +472,25 @@ describe("The commitAnswer service", () => {
             const listProvider = "listProvider";
             const src = "src";
             const limit = undefined;
-            const relatedFilter = undefined;
+            const relatedFilter = "[tag<currentTiddler>]";
             const log = true;
             const idle = false;
-            const targetDueDate = new Date().getTime() + 100000;
-            const targetLastDate = new Date().getTime() - 100000;
+            const now = new Date().getTime();
+            const targetDueDate = now - offset_24h;
+            const targetLastDate = targetDueDate - offset_24h;
             const targetTemplate = {
-                title: "scheduledForward",
+                title: "target",
                 tags: [src, context.tags.scheduledForward],
                 'srs-forward-due': targetDueDate,
                 'srs-forward-last': targetLastDate
+            };
+            const relatedDueDate = now + offset_1y;
+            const relatedLastDate = now - offset_24h;
+            const relatedTemplate = {
+                title: "related",
+                tags: [targetTemplate.title],
+                'srs-forward-due': relatedDueDate,
+                'srs-forward-last': relatedLastDate
             };
             options.env.macros[listProvider] = {
                 name: listProvider,
@@ -490,21 +501,12 @@ describe("The commitAnswer service", () => {
                             type: src,
                             src: targetTemplate.title,
                             direction: "forward"
-                        },
-                        {
-                            type: src,
-                            src: targetTemplate.title,
-                            direction: "forward"
-                        },
-                        {
-                            type: src,
-                            src: targetTemplate.title,
-                            direction: "forward"
-                        },
+                        }
                     ];
                 }
             }
             options.widget.wiki.addTiddler(targetTemplate);
+            options.widget.wiki.addTiddler(relatedTemplate);
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
@@ -527,21 +529,31 @@ describe("The commitAnswer service", () => {
             expect(messageHandler.createSession(params, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             if (alert = Logger.alert.calls.first()) console.warn(alert.args)
+            console.debug("now", new Date(now))
             var targetTiddlerInstance = options.widget.wiki.getTiddler(targetTemplate.title);
-            const initialStep = targetTiddlerInstance.fields['srs-forward-due'] - targetTiddlerInstance.fields['srs-forward-last'];
-            console.debug("targetTiddlerInstance", targetTiddlerInstance, initialStep);
-            // answer first question
+            console.debug("targetTiddlerInstance", targetTiddlerInstance,
+                "due:", new Date(targetTiddlerInstance.fields['srs-forward-due']),
+                "last:", new Date(targetTiddlerInstance.fields['srs-forward-last']));
+            var relatedTiddlerInstance = options.widget.wiki.getTiddler(relatedTemplate.title);
+            console.debug("relatedTiddlerInstance", relatedTiddlerInstance,
+                "due:", new Date(relatedTiddlerInstance.fields['srs-forward-due']),
+                "last:", new Date(relatedTiddlerInstance.fields['srs-forward-last']));
+            const dueValue = relatedTiddlerInstance.fields['srs-forward-due'];
+            const lastValue = relatedTiddlerInstance.fields['srs-forward-last'];
+            const stepSize = dueValue - lastValue;
+            console.debug("--- commit answer ---")
             expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
             targetTiddlerInstance = options.widget.wiki.getTiddler(targetTemplate.title);
-            expect(targetTiddlerInstance.fields['srs-forward-due'] - targetTiddlerInstance.fields['srs-forward-last']).toEqual(initialStep);
-            // answer second question
-            expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
-            targetTiddlerInstance = options.widget.wiki.getTiddler(targetTemplate.title);
-            expect(targetTiddlerInstance.fields['srs-forward-due'] - targetTiddlerInstance.fields['srs-forward-last']).toEqual(initialStep);
-            // answer third question
-            expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
-            targetTiddlerInstance = options.widget.wiki.getTiddler(targetTemplate.title);
-            expect(targetTiddlerInstance.fields['srs-forward-due'] - targetTiddlerInstance.fields['srs-forward-last']).toEqual(initialStep);
+            console.debug("targetTiddlerInstance", targetTiddlerInstance,
+                "due:", new Date(targetTiddlerInstance.fields['srs-forward-due']),
+                "last:", new Date(targetTiddlerInstance.fields['srs-forward-last']));
+            relatedTiddlerInstance = options.widget.wiki.getTiddler(relatedTemplate.title);
+            console.debug("relatedTiddlerInstance", relatedTiddlerInstance,
+                "due:", new Date(relatedTiddlerInstance.fields['srs-forward-due']),
+                "last:", new Date(relatedTiddlerInstance.fields['srs-forward-last']));
+            expect(relatedTiddlerInstance.fields['srs-forward-due']).toBeGreaterThan(dueValue);
+            expect(relatedTiddlerInstance.fields['srs-forward-last']).toBeGreaterThan(lastValue);
+            expect(relatedTiddlerInstance.fields['srs-forward-due'] - relatedTiddlerInstance.fields['srs-forward-last']).toEqual(stepSize);
         })
 
 });
