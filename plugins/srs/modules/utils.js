@@ -69,6 +69,18 @@ function purgeArray(srcArray, purgeArray) {
   return srcArray.filter(el => !purgeArray.includes(el));
 }
 
+function copyObjectAttributes(src, dst) {
+  if (!src || !dst) throw Error("copyObjectAttributes: both src and dst should be defined");
+  Object.entries(src).forEach(([key, value]) => {
+    if (value !== undefined) {
+      dst[key] = value;
+    } else {
+      delete dst[key];
+    }
+  });
+
+}
+
 function arraysIntersection(arr1, arr2) {
   if (!Array.isArray(arr1) || !Array.isArray(arr2) || !arr1.length || !arr2.length) return [];
   var a1, a2;
@@ -86,7 +98,7 @@ function arraysIntersection(arr1, arr2) {
     if (map.has(a2[i])) {
       result.push(a2[i]);
       map.delete(a2[i]);
-      if(!map.size) break;
+      if (!map.size) break;
     }
   }
   return result;
@@ -145,13 +157,19 @@ function getWikiUtils(wiki) {
     if (!titleOrTiddler) throw new Error("title or tiddler is required");
     const tiddler = getTitleAndInstance(titleOrTiddler);
 
-    function updateTiddler(fields) {
+    function updateTiddler(fields, createIfNecessary) {
       if (!fields) throw new Error("fields parameter is required");
       if (tiddler.instance) {
         wiki.addTiddler(new $tw.Tiddler(
           tiddler.instance,
           fields,
           wiki.getModificationFields()));
+      } else if (createIfNecessary) {
+        const data = {
+          title: tiddler.title
+        };
+        copyObjectAttributes(fields, data);
+        addTiddler(data);
       }
     };
 
@@ -193,13 +211,7 @@ function getWikiUtils(wiki) {
         setOrCreateTiddlerData: function (dataObj) {
           if (!dataObj) throw new Error("tiddler data are required");
           const data = wiki.getTiddlerData(tiddler.title, Object.create(null));
-          Object.entries(dataObj).forEach(([key, value]) => {
-            if (value !== undefined) {
-              data[key] = value;
-            } else {
-              delete data[key];
-            }
-          });
+          copyObjectAttributes(dataObj, data);
           wiki.setTiddlerData(tiddler.title, data, {}, {});
         }
       }

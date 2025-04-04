@@ -126,7 +126,8 @@ describe("The commitAnswer service", () => {
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
+            const result = verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
+            verifyLastTimeState(result.modified, options);
         })
 
     it("should update SRS fields in source (asked) tiddler"
@@ -182,7 +183,8 @@ describe("The commitAnswer service", () => {
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
             // console.warn("nextAskedTemplate",nextAskedTemplate)
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
+            const result = verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
+            verifyLastTimeState(result.modified, options);
         })
 
     it("should update SRS fields in source (asked) tiddler"
@@ -231,7 +233,8 @@ describe("The commitAnswer service", () => {
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
-            verifySession(ref, srcTag, direction, nextAskedTemplate, 0, 0, 0, options);
+            const result = verifySession(ref, srcTag, direction, nextAskedTemplate, 0, 0, 0, options);
+            verifyLastTimeState(result.modified, options);
         })
 
     it("should update SRS fields in source (asked) tiddler"
@@ -614,6 +617,14 @@ function verifySession(session, srcTag, direction, current, repeatCount, newcome
     }
     return {
         src: currentSrc,
-        direction: sessionData["current-direction"]
+        direction: sessionData["current-direction"],
+        modified: sessionData["modified"]
     };
+}
+
+function verifyLastTimeState(time, options) {
+    const lastAnswerTimeInstance = options.widget.wiki.getTiddler("$:/state/srs/lastAnswerTime");
+    console.debug("lastAnswerTimeInstence", lastAnswerTimeInstance);
+    expect(lastAnswerTimeInstance).toBeDefined();
+    expect(lastAnswerTimeInstance.fields.text).toEqual(time);
 }

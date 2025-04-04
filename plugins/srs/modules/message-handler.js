@@ -647,9 +647,10 @@ Handling SRS messages.
     const relatedTiddlers = updateRelated ? context.wikiUtils.filterTiddlers(updateRelated.replaceAll("<currentTiddler>", "[" + srcTiddler.getTitle() + "]"))
       .map(title => context.wikiUtils.withTiddler(title))
       .filter(tiddler => tiddler.exists()) : [];
-    const newDue = updateSrsFields(srcTiddler, relatedTiddlers, asked.direction, answer, context);
+    const now = new Date().getTime();
+    const newDue = updateSrsFields(srcTiddler, relatedTiddlers, asked.direction, answer, now, context);
+    context.wikiUtils.withTiddler("$:/state/srs/lastAnswerTime").doNotInvokeSequentiallyOnSameTiddler.updateTiddler({text:now}, true);
     const next = session.acceptAnswerAndGetNext(asked.src, newDue, answer, log);
-    // const nextSteps = next.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(next.entry.src), getSrsFieldsNames(next.entry.direction, context), context) : undefined;
     const nextSteps = next.entry ? getNextStepsForTitle(next.entry.src, next.entry.direction, context) : undefined;
     const answerRelatedFilter = next.entry ? getAnswerRelatedFilter(next.entry, session.getSrc(), context) : undefined;
     const data = {};
@@ -665,7 +666,7 @@ Handling SRS messages.
     data["next-step-hold"] = nextSteps ? nextSteps.hold : undefined;
     data["next-step-onward"] = nextSteps ? nextSteps.onward : undefined;
     data["estimatedEndTime"] = calculateEstimatedEndTime(next.counters);
-    data["modified"] = new Date().getTime();
+    data["modified"] = now;
     context.wikiUtils.withTiddler(ref).doNotInvokeSequentiallyOnSameTiddler.setOrCreateTiddlerData(data);
   };
 
@@ -745,14 +746,13 @@ Handling SRS messages.
     return calculateNextSteps(due, last, context);
   }
 
-  function updateSrsFields(tiddler, relatedTiddlers, direction, answer, context) {
-    const now = new Date().getTime();
+  function updateSrsFields(tiddler, relatedTiddlers, direction, answer, time, context) {
     const srsFieldsNames = getSrsFieldsNames(direction, context);
-    const newDue = calculateDueDate(tiddler, answer, srsFieldsNames, now, context);
-    storeSrsFields(tiddler, srsFieldsNames, newDue, now, answer === utils.SRS_ANSWER_EXCLUDE, context);
+    const newDue = calculateDueDate(tiddler, answer, srsFieldsNames, time, context);
+    storeSrsFields(tiddler, srsFieldsNames, newDue, time, answer === utils.SRS_ANSWER_EXCLUDE, context);
     if (answer !== utils.SRS_ANSWER_RESET && answer !== utils.SRS_ANSWER_EXCLUDE && relatedTiddlers) relatedTiddlers.forEach(relatedTiddler => {
-      const newDue = calculateDueDate(relatedTiddler, answer, srsFieldsNames, now, context);
-      storeSrsFields(relatedTiddler, srsFieldsNames, newDue, now, false, context);
+      const newDue = calculateDueDate(relatedTiddler, answer, srsFieldsNames, time, context);
+      storeSrsFields(relatedTiddler, srsFieldsNames, newDue, time, false, context);
     });
     return newDue;
   }
