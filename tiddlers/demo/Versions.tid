@@ -1,10 +1,6 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
-!! 0.1.9
-
-* storing the last answer time in `$:/state/srs/lastAnswerTime`
-
 !! 0.1.8
 
 * added possibility to use custom data for organizing learning session (see [[here|Using Custom Data For Organizing Learning Session]] for details)
