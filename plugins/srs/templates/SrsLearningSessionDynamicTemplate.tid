@@ -26,6 +26,12 @@ type: text/vnd.tiddlywiki
     onwardButtonText:"Good ~<<format-time next-step-onward>>",
     excludeButtonText:"Exclude",
     answerTipText:"If it was easy - press the <code>Good</code> button. If it wasn't - press the <code>Hard</code> button. If you couldn't remember - press the <code>Again</code> button.",
+    preCreateHook,
+    postCreateHook,
+    preDestroyHook,
+    postDestroyHook,
+    preAnswerHook,
+    postAnswerHook,
     log
 )
 
@@ -44,6 +50,8 @@ type: text/vnd.tiddlywiki
  resetAfter=<<resetAfter>>
  newFirst=<<newFirst>>
  listProvider=<<listProvider>>
+ preCreateHook=<<preCreateHook>>
+ postCreateHook=<<postCreateHook>>
  log=<<log>>
 /><$action-setfield
  $tiddler=<<session>>
@@ -180,6 +188,8 @@ $defer=<<answerLatency>>
  ref=<<session>>
  answer="$answer$"
  updateRelated=<<current-answer-related-filter>>
+ preAnswerHook=<<preAnswerHook>>
+ postAnswerHook=<<postAnswerHook>>
  log=<<log>>
 /><$action-setfield
  $tiddler=<<session>>
@@ -205,7 +215,8 @@ $defer=<<answerLatency>>
 <$action-sendmessage
  $message="tm-srs-delete-session"
  ref=<<session>>
- answer="$answer$"
+ preDestroyHook=<<preDestroyHook>>
+ postDestroyHook=<<postDestroyHook>>
 /><$action-deletetiddler
  $tiddler=<<session>>
 /><$action-deletetiddler

@@ -40,7 +40,6 @@ describe("The createSession service", () => {
                 const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = 2; // two items from each group
-                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -51,7 +50,7 @@ describe("The createSession service", () => {
                 // console.warn(options.widget.wiki.getTiddler("group1item1"))
                 const askedMap = {};
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
-                const params = {
+                const createSessionParams = {
                     ref: ref,
                     src: src,
                     direction: direction,
@@ -64,7 +63,14 @@ describe("The createSession service", () => {
                     log: log,
                     idle: idle
                 };
-                expect(messageHandler.createSession(params, options.widget)).nothing();
+                const commitAnswerParams = {
+                    ref: ref,
+                    answer: "onward",
+                    updateRelated: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 var expectedTiddlersCount = 4;
                 var expectedNewComerTiddlers = 3;
@@ -72,7 +78,7 @@ describe("The createSession service", () => {
                 while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
-                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.envt)).nothing();
                 }
                 expect(askedMap[group1]).toEqual(2);
                 expect(askedMap[group2]).toEqual(2);
@@ -97,7 +103,6 @@ describe("The createSession service", () => {
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = undefined; // no limit
                 // const groupLimit = 0; // no limit
-                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -110,7 +115,7 @@ describe("The createSession service", () => {
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
                 // consoleSpy.and.callThrough();
                 loggerSpy.and.callThrough();
-                const params = {
+                const createSessionParams = {
                     ref: ref,
                     src: src,
                     direction: direction,
@@ -123,7 +128,14 @@ describe("The createSession service", () => {
                     log: log,
                     idle: idle
                 };
-                expect(messageHandler.createSession(params, options.widget)).nothing();
+                const commitAnswerParams = {
+                    ref: ref,
+                    answer: "onward",
+                    updateRelated: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 var expectedTiddlersCount = 10;
                 var expectedNewComerTiddlers = 9;
@@ -131,7 +143,7 @@ describe("The createSession service", () => {
                 while (expectedTiddlersCount-- > 0) {
                     const asked = verifySession(ref, src, direction, expectedRepeatTiddlers++, expectedNewComerTiddlers--, 0, options);
                     verifyAskedTiddler(asked, sourceTiddlers, askedMap);
-                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                 }
                 expect(askedMap[group1]).toEqual(5);
                 expect(askedMap[group2]).toEqual(5);
@@ -155,7 +167,6 @@ describe("The createSession service", () => {
                 const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
                 const groupFilter = undefined; // we do not need this paraneter
                 const groupLimit = undefined; // no limit
-                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const sourceTiddlers = createSourceTiddlers_sameTiddlerInEachGroup(src, [group1, group2], options, context);
@@ -166,7 +177,7 @@ describe("The createSession service", () => {
                 // console.warn(options.widget.wiki.getTiddler("sharedItem"))
                 const askedMap = {};
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
-                const params = {
+                const createSessionParams = {
                     ref: ref,
                     src: src,
                     direction: direction,
@@ -179,7 +190,14 @@ describe("The createSession service", () => {
                     log: log,
                     idle: idle
                 };
-                expect(messageHandler.createSession(params, options.widget)).nothing();
+                const commitAnswerParams = {
+                    ref: ref,
+                    answer: "onward",
+                    updateRelated: undefined,
+                    log: log,
+                    idle: idle
+                };
+                expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
                 const expectedTiddlersCount = 1;
                 var actualTiddlersCount = 0;
@@ -194,7 +212,7 @@ describe("The createSession service", () => {
                         expectedRepeatTiddlers++;
                         if (expectedNewComerTiddlers > 0) expectedNewComerTiddlers--;
                     }
-                    expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                    expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                     asked = verifySession(ref, src, direction, expectedRepeatTiddlers, expectedNewComerTiddlers, 0, options);
                 } while (asked.src)
                 expect(expectedTiddlersCount).toEqual(actualTiddlersCount);

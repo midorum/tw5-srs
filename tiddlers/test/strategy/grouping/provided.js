@@ -21,7 +21,7 @@ describe("The createSession service", () => {
         loggerSpy = spyOn(Logger, 'alert');
     });
 
-    
+
     describe("with provided group strategy", () => {
 
         it("should fail"
@@ -71,7 +71,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return {};
                     }
                 }
@@ -110,7 +110,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return [
                             {}
                         ];
@@ -151,7 +151,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type"
@@ -194,7 +194,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -238,7 +238,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -283,7 +283,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         return [
                             {
                                 type: "type",
@@ -326,7 +326,6 @@ describe("The createSession service", () => {
                 const src1 = "src1";
                 const src2 = "src2";
                 const limit = undefined;
-                const relatedFilter = undefined;
                 const log = true;
                 const idle = false;
                 const src1Template = { title: "src1_scheduledForward", tags: [src1, context.tags.scheduledForward] };
@@ -334,7 +333,7 @@ describe("The createSession service", () => {
                 options.env.macros[listProvider] = {
                     name: listProvider,
                     params: [],
-                    run: function(wiki, direction, limit, time) {
+                    run: function (wiki, direction, limit, time) {
                         // wiki.getTiddlersWithTag(src1).forEach(tiddler => {
                         //     console.warn(tiddler);
                         // });
@@ -361,7 +360,7 @@ describe("The createSession service", () => {
                 options.widget.wiki.addTiddler(src1Template);
                 options.widget.wiki.addTiddler(src2Template);
                 options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
-                const params = {
+                const createSessionParams = {
                     ref: ref,
                     src: undefined,
                     direction: undefined,
@@ -375,10 +374,17 @@ describe("The createSession service", () => {
                     log: log,
                     idle: idle
                 };
+                const commitAnswerParams = {
+                    ref: ref,
+                    answer: "onward",
+                    updateRelated: undefined,
+                    log: log,
+                    idle: idle
+                };
                 // create a session
-                expect(messageHandler.createSession(params, options.widget, options.env)).nothing();
+                expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
                 expect(Logger.alert).toHaveBeenCalledTimes(0);
-                if(alert = Logger.alert.calls.first()) console.warn(alert.args)
+                if (alert = Logger.alert.calls.first()) console.warn(alert.args)
                 var sessionInstance = options.widget.wiki.getTiddler(ref);
                 // console.warn(sessionInstance);
                 expect(sessionInstance).toBeDefined();
@@ -392,7 +398,7 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-overdue"]).toEqual(0);
                 expect(sessionData["counter-newcomer"]).toEqual(1);
                 // answer first question
-                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                 sessionInstance = options.widget.wiki.getTiddler(ref);
                 // console.warn(sessionInstance);
                 expect(sessionInstance).toBeDefined();
@@ -405,7 +411,7 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-overdue"]).toEqual(0);
                 expect(sessionData["counter-newcomer"]).toEqual(0);
                 // answer second question
-                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                 sessionInstance = options.widget.wiki.getTiddler(ref);
                 // console.warn(sessionInstance);
                 expect(sessionInstance).toBeDefined();
@@ -419,6 +425,6 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-newcomer"]).toEqual(0);
             })
 
-        });
+    });
 
 });

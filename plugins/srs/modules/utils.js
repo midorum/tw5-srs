@@ -69,6 +69,27 @@ function purgeArray(srcArray, purgeArray) {
   return srcArray.filter(el => !purgeArray.includes(el));
 }
 
+function deepCopy(source) {
+  return source ? JSON.parse(JSON.stringify(source)) : undefined;
+}
+
+function copyObjectAttributes(target, source) {
+  if (!source || !target) throw Error("copyObjectAttributes: both target and source should be defined");
+  return Object.assign(target, source);
+}
+
+function copyOrDeleteObjectAttributes(target, source) {
+  if (!source || !target) throw Error("copyOrDeleteObjectAttributes: both target and source should be defined");
+  Object.entries(source).forEach(([key, value]) => {
+    if (value !== undefined) {
+      target[key] = value;
+    } else {
+      delete target[key];
+    }
+  });
+  return target;
+}
+
 function arraysIntersection(arr1, arr2) {
   if (!Array.isArray(arr1) || !Array.isArray(arr2) || !arr1.length || !arr2.length) return [];
   var a1, a2;
@@ -86,7 +107,7 @@ function arraysIntersection(arr1, arr2) {
     if (map.has(a2[i])) {
       result.push(a2[i]);
       map.delete(a2[i]);
-      if(!map.size) break;
+      if (!map.size) break;
     }
   }
   return result;
@@ -111,7 +132,22 @@ function formatString(str, ...arr) {
 }
 
 // Below are wiki-sensitive functions
-function getWikiUtils(wiki) {
+function getWikiUtils(wiki, cache) {
+  const srsTags = cache.getTags([]);
+
+  const ProxyWiki = function () {
+    return {
+      SRS_BASE_TIME: SRS_BASE_TIME,
+      getTitlesWithTag: (tag) => wiki.getTiddlersWithTag(tag),
+      filterTitles: (filterString) => wiki.filterTiddlers(filterString),
+      allTitles: () => wiki.allTitles(),
+      allShadowTitles: () => wiki.allShadowTitles(),
+      tiddlerExists: (title) => wiki.tiddlerExists(title),
+      isShadowTiddler: (title) => wiki.isShadowTiddler(title),
+      getTiddler: (title) => wiki.getTiddler(title),
+      getSrsData: (titleOrTiddler) => withTiddler(titleOrTiddler).getSrsData()
+    };
+  };
 
   function getTitleAndInstance(titleOrTiddler) {
     return (titleOrTiddler instanceof $tw.Tiddler) ? {
@@ -163,11 +199,28 @@ function getWikiUtils(wiki) {
       return (tiddler.instance && field) ? tiddler.instance.getFieldString(field, defaultValue) : defaultValue;
     }
 
+    function getSrsData() {
+      const tags = getTiddlerTagsShallowCopy();
+      return {
+        forward: tags.includes(srsTags.scheduledForward) ? {
+          due: parseInteger(getTiddlerField(SRS_FORWARD_DUE_FIELD)),
+          direction: FORWARD_DIRECTION,
+          src: tiddler.title
+        } : undefined,
+        backward: tags.includes(srsTags.scheduledBackward) ? {
+          due: parseInteger(getTiddlerField(SRS_BACKWARD_DUE_FIELD)),
+          direction: BACKWARD_DIRECTION,
+          src: tiddler.title
+        } : undefined
+      };
+    }
+
     return {
       exists: () => !!tiddler.instance,
       getTitle: () => tiddler.title,
       getTiddlerTagsShallowCopy: getTiddlerTagsShallowCopy,
       getTiddlerField: getTiddlerField,
+      getSrsData: getSrsData,
       // Below are non-pure unsafe functions that use TiddlyWiki message mechanism - they all shouldn't be invoked sequentially for the same tiddler
       doNotInvokeSequentiallyOnSameTiddler: {
         updateTiddler: updateTiddler,
@@ -208,9 +261,18 @@ function getWikiUtils(wiki) {
 
   return {
     wiki: wiki,
+    srsTags: srsTags,
+    createProxyWiki: () => new ProxyWiki(),
     withTiddler: withTiddler,
     filterTiddlers: filterTiddlers,
     allTitlesWithTag: allTitlesWithTag,
+    getSrsFieldsNames: (direction) => {
+      return {
+        tag: direction === FORWARD_DIRECTION ? srsTags.scheduledForward : srsTags.scheduledBackward,
+        dueField: direction === FORWARD_DIRECTION ? SRS_FORWARD_DUE_FIELD : SRS_BACKWARD_DUE_FIELD,
+        lastField: direction === FORWARD_DIRECTION ? SRS_FORWARD_LAST_FIELD : SRS_BACKWARD_LAST_FIELD
+      };
+    }
   };
 
 }
@@ -232,6 +294,9 @@ exports.srsUtils = {
   parseJsonOrUndefined: parseJsonOrUndefined,
   parseInteger: parseInteger,
   arraysAreEqual: arraysAreEqual,
+  deepCopy: deepCopy,
+  copyObjectAttributes: copyObjectAttributes,
+  copyOrDeleteObjectAttributes: copyOrDeleteObjectAttributes,
   arraysIntersection: arraysIntersection,
   purgeArray: purgeArray,
   getSupportedDirections: getSupportedDirections,
