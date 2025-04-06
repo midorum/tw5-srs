@@ -31,11 +31,17 @@ describe("The commitAnswer service", () => {
         const options = utils.setupWiki();
         const ref = undefined;
         const answer = undefined;
-        const relatedFilter = undefined;
         const log = undefined;
         const idle = true;
         const expectedMessage = "ref cannot be empty";
-        expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            answer: answer,
+            updateRelated: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.commitAnswer(params, options.widget, options.env)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -45,11 +51,17 @@ describe("The commitAnswer service", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const answer = undefined;
-        const relatedFilter = undefined;
         const log = undefined;
         const idle = true;
         const expectedMessage = "answer cannot be empty";
-        expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            answer: answer,
+            updateRelated: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.commitAnswer(params, options.widget, options.env)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -59,11 +71,17 @@ describe("The commitAnswer service", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const answer = "some";
-        const relatedFilter = undefined;
         const log = undefined;
         const idle = true;
         const expectedMessage = "answer argument should be one of [reset,hold,onward,exclude]";
-        expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            answer: answer,
+            updateRelated: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.commitAnswer(params, options.widget, options.env)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -73,11 +91,17 @@ describe("The commitAnswer service", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const answer = "reset";
-        const relatedFilter = undefined;
         const log = undefined;
         const idle = false;
         const expectedMessage = "SRS session not found: " + ref;
-        expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            answer: answer,
+            updateRelated: undefined,
+            log: log,
+            idle: idle
+        };
+        expect(messageHandler.commitAnswer(params, options.widget, options.env)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -93,7 +117,6 @@ describe("The commitAnswer service", () => {
             const srcTag = "some tag";
             const direction = "both";
             const answer = "reset";
-            const relatedFilter = undefined;
             const log = undefined;
             const idle = false;
             const scheduledForwardTitle = "scheduledForward";
@@ -107,7 +130,7 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: "both",
@@ -120,9 +143,16 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
@@ -139,7 +169,6 @@ describe("The commitAnswer service", () => {
             const srcTag = "some tag";
             const direction = "both";
             const answer = "onward";
-            const relatedFilter = undefined;
             const log = undefined;
             const idle = false;
             const scheduledForwardTitle = "scheduledForward";
@@ -161,7 +190,7 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler(scheduledBackwardTemplate);
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: "both",
@@ -174,10 +203,17 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
             // console.warn("firstAsked",firstAsked)
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
@@ -196,7 +232,6 @@ describe("The commitAnswer service", () => {
             const srcTag = "some tag";
             const direction = "both";
             const answer = "exclude";
-            const relatedFilter = undefined;
             const log = undefined;
             const idle = false;
             const scheduledForwardTitle = "scheduledForward";
@@ -212,7 +247,7 @@ describe("The commitAnswer service", () => {
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: "both",
@@ -225,9 +260,16 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
             const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
             const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
@@ -245,6 +287,7 @@ describe("The commitAnswer service", () => {
             const additionalTag2 = "additionalTag2";
             const direction = "forward";
             const answer = "onward";
+            const preAnswerHook = "preAnswerHook";
             const log = undefined;
             const idle = false;
             const targetTiddler = "targetTiddler";
@@ -272,6 +315,14 @@ describe("The commitAnswer service", () => {
             const relatedTiddler3Template = { title: relatedTiddler3, tags: [targetTiddler] }; // shouldn't be updated
             const relatedTiddler4Template = { title: relatedTiddler4, tags: [] }; // shouldn't be updated
             const relatedFilter = "[tag[" + additionalTag1 + "]tag<currentTiddler>] [<currentTiddler>tags[]tag[" + additionalTag2 + "]]";
+            options.env.macros[preAnswerHook] = {
+                name: preAnswerHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("preAnswerHook hook params", params);
+                    return true;
+                }
+            }
             options.widget.wiki.addTiddler(targetTiddlerTemplate);
             options.widget.wiki.addTiddler(relatedTiddler1Template);
             options.widget.wiki.addTiddler(relatedTiddler2Template);
@@ -281,9 +332,7 @@ describe("The commitAnswer service", () => {
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const filtered = options.widget.wiki.filterTiddlers(relatedFilter);
-            console.debug("filtered", filtered);
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: direction,
@@ -296,8 +345,16 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: relatedFilter,
+                preAnswerHook: preAnswerHook,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const targetTiddlerInstance = options.widget.wiki.getTiddler(targetTiddler);
             console.debug("targetTiddlerInstance", targetTiddlerInstance);
@@ -352,9 +409,7 @@ describe("The commitAnswer service", () => {
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const filtered = options.widget.wiki.filterTiddlers(relatedFilter);
-            console.debug("filtered", filtered);
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: direction,
@@ -367,8 +422,15 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: relatedFilter,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const targetTiddlerInstance = options.widget.wiki.getTiddler(targetTiddler);
             console.debug("targetTiddlerInstance", targetTiddlerInstance);
@@ -423,9 +485,7 @@ describe("The commitAnswer service", () => {
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const filtered = options.widget.wiki.filterTiddlers(relatedFilter);
-            console.debug("filtered", filtered);
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: srcTag,
                 direction: direction,
@@ -438,8 +498,15 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
-            expect(messageHandler.commitAnswer(ref, answer, relatedFilter, log, idle, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: relatedFilter,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const targetTiddlerInstance = options.widget.wiki.getTiddler(targetTiddler);
             console.debug("targetTiddlerInstance", targetTiddlerInstance);
@@ -511,7 +578,7 @@ describe("The commitAnswer service", () => {
             // consoleSpy.and.callThrough();
             // consoleDebugSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: undefined,
                 direction: undefined,
@@ -525,8 +592,15 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
+            const commitAnswerParams = {
+                ref: ref,
+                answer: "onward",
+                updateRelated: relatedFilter,
+                log: log,
+                idle: idle
+            };
             // create a session
-            expect(messageHandler.createSession(params, options.widget, options.env)).nothing();
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             if (alert = Logger.alert.calls.first()) console.warn(alert.args)
             console.debug("now", new Date(now))
@@ -542,7 +616,7 @@ describe("The commitAnswer service", () => {
             const lastValue = relatedTiddlerInstance.fields['srs-forward-last'];
             const stepSize = dueValue - lastValue;
             console.debug("--- commit answer ---")
-            expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
             targetTiddlerInstance = options.widget.wiki.getTiddler(targetTemplate.title);
             console.debug("targetTiddlerInstance", targetTiddlerInstance,
                 "due:", new Date(targetTiddlerInstance.fields['srs-forward-due']),
@@ -554,6 +628,104 @@ describe("The commitAnswer service", () => {
             expect(relatedTiddlerInstance.fields['srs-forward-due']).toBeGreaterThan(dueValue);
             expect(relatedTiddlerInstance.fields['srs-forward-last']).toBeGreaterThan(lastValue);
             expect(relatedTiddlerInstance.fields['srs-forward-due'] - relatedTiddlerInstance.fields['srs-forward-last']).toEqual(stepSize);
+        })
+
+    it("should update SRS fields in source (asked) tiddler"
+        + " and invoke answer hooks when they are defined"
+        + " when preAnswerHook returns true", () => {
+            const options = utils.setupWiki();
+            const context = utils.getSrsContext();
+            const ref = "$:/temp/srs/session";
+            const srcTag = "some tag";
+            const direction = "both";
+            const answer = "onward";
+            const preAnswerHook = "preAnswerHook";
+            const postAnswerHook = "postAnswerHook";
+            const log = undefined;
+            const idle = false;
+            const scheduledForwardTitle = "scheduledForward";
+            const scheduledBacwardTitle = "scheduledBackward";
+            const scheduledForwardTemplate = {
+                title: scheduledForwardTitle,
+                tags: [srcTag, context.tags.scheduledForward],
+                'srs-forward-due': 1716874123993,
+                'srs-forward-last': 1716874063993
+            };
+            const scheduledBackwardTemplate = {
+                title: scheduledBacwardTitle,
+                tags: [srcTag, context.tags.scheduledBackward]
+            };
+            const templateMap = {};
+            templateMap[scheduledForwardTemplate.title] = scheduledForwardTemplate;
+            templateMap[scheduledBackwardTemplate.title] = scheduledBackwardTemplate;
+            options.env.macros[preAnswerHook] = {
+                name: preAnswerHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("preAnswerHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    const ft = wiki.getTiddler(scheduledForwardTitle);
+                    expect(ft.fields['srs-forward-due']).toEqual(scheduledForwardTemplate['srs-forward-due']);
+                    expect(ft.fields['srs-forward-last']).toEqual(scheduledForwardTemplate['srs-forward-last']);
+                    const bt = wiki.getTiddler(scheduledBacwardTitle);
+                    expect(bt.fields['srs-forward-due']).toEqual(scheduledBackwardTemplate['srs-forward-due']);
+                    expect(bt.fields['srs-forward-last']).toEqual(scheduledBackwardTemplate['srs-forward-last']);
+                    return true;
+                }
+            }
+            options.env.macros[postAnswerHook] = {
+                name: postAnswerHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("postAnswerHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    const ft = wiki.getTiddler(scheduledForwardTitle);
+                    expect(ft.fields['srs-forward-due']).not.toEqual(scheduledForwardTemplate['srs-forward-due']);
+                    expect(ft.fields['srs-forward-last']).not.toEqual(scheduledForwardTemplate['srs-forward-last']);
+                    const bt = wiki.getTiddler(scheduledBacwardTitle);
+                    expect(bt.fields['srs-forward-due']).toEqual(scheduledBackwardTemplate['srs-forward-due']);
+                    expect(bt.fields['srs-forward-last']).toEqual(scheduledBackwardTemplate['srs-forward-last']);
+                }
+            }
+            options.widget.wiki.addTiddler(scheduledForwardTemplate);
+            options.widget.wiki.addTiddler(scheduledBackwardTemplate);
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            // consoleSpy.and.callThrough();
+            // consoleDebugSpy.and.callThrough();
+            loggerSpy.and.callThrough();
+            const createSessionParams = {
+                ref: ref,
+                src: srcTag,
+                direction: "both",
+                limit: undefined,
+                groupFilter: undefined,
+                groupStrategy: undefined,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: log,
+                idle: idle
+            };
+            const commitAnswerParams = {
+                ref: ref,
+                answer: answer,
+                updateRelated: undefined,
+                preAnswerHook: preAnswerHook,
+                postAnswerHook: postAnswerHook,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
+            const firstAsked = verifySession(ref, srcTag, direction, undefined, 0, 1, 0, options);
+            // console.warn("firstAsked",firstAsked)
+            expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            verifyAskedTiddler(firstAsked, answer, templateMap, options, context);
+            const nextAskedTemplate = firstAsked.src === scheduledForwardTitle ? scheduledBackwardTemplate : scheduledForwardTemplate;
+            // console.warn("nextAskedTemplate",nextAskedTemplate)
+            verifySession(ref, srcTag, direction, nextAskedTemplate, 1, 0, 0, options);
         })
 
 });

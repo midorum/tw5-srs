@@ -42,13 +42,13 @@ Adds listeners for SRS messages.
     $tw.rootWidget.addEventListener("tm-srs-delete-session", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.deleteSession(params.ref, params.idle, widget);
+      messageHandler.deleteSession(params, widget, $tw);
     });
 
     $tw.rootWidget.addEventListener("tm-srs-commit-answer", function (event) {
       const widget = event.widget || $tw.rootWidget;
       const params = event.paramObject || {};
-      messageHandler.commitAnswer(params.ref, params.answer, params.updateRelated, params.log, params.idle, widget);
+      messageHandler.commitAnswer(params, widget, $tw);
     });
 
   };
