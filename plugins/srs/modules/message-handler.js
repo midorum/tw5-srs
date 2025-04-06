@@ -636,7 +636,6 @@ Handling SRS messages.
       .map(title => context.wikiUtils.withTiddler(title))
       .filter(tiddler => tiddler.exists());
     const newDue = updateSrsFields(srcTiddler, relatedTiddlers, asked.direction, answer, now, context.wikiUtils);
-    context.wikiUtils.withTiddler("$:/state/srs/lastAnswerTime").doNotInvokeSequentiallyOnSameTiddler.updateTiddler({ text: now }, true);
     const next = session.acceptAnswerAndGetNext(asked.src, newDue, answer, params.log);
     const nextSteps = next.entry ? getNextStepsForTitle(next.entry.src, next.entry.direction, context.wikiUtils) : undefined;
     const answerRelatedFilter = next.entry ? getAnswerRelatedFilter(next.entry, session.getSrc(), context.wikiUtils) : undefined;
