@@ -60,7 +60,7 @@ Some hooks should return a result. It depends on a particular hook and is descri
 
 This macro will be invoked by the SRS system before creating a new learning session. You can use this hook for debug purpose or some validation. You can also prevent creation a new session if you need.
 
-To make it work you should pass this macro title to the `tm-srs-create-session` message in the `preCreateHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `preCreateHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-create-session` message in the `preCreateHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `preCreateHook` attribute.
 
 The SRS system expects that the ''preCreateHook'' returns a boolean result. It must return `true` in order to proceed session creation or `false` to prevent (abort) session creation.
 
@@ -72,7 +72,7 @@ The SRS system passes to the ''preCreateHook'' macro the following data (in `par
 
 This macro will be invoked by the SRS system immediatelly after a new learning session has been created. You can use this hook for debug purpose or some validation.
 
-To make it work you should pass this macro title to the `tm-srs-create-session` message in the `postCreateHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `postCreateHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-create-session` message in the `postCreateHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `postCreateHook` attribute.
 
 The SRS system does not expect that the ''postCreateHook'' returns any result.
 
@@ -86,7 +86,7 @@ The SRS system passes to the ''postCreateHook'' macro the following data (in `pa
 
 This macro will be invoked by the SRS system before deleting the current learning session. You can use this hook for debug purpose or some validation. You can also prevent the session to be deleted.
 
-To make it work you should pass this macro title to the `tm-srs-delete-session` message in the `preDestroyHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `preDestroyHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-delete-session` message in the `preDestroyHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `preDestroyHook` attribute.
 
 The SRS system expects that the ''preDestroyHook'' returns a boolean result. It must return `true` in order to proceed session deletion or `false` to prevent (abort) session deletion.
 
@@ -98,7 +98,7 @@ The SRS system passes to the ''preDestroyHook'' macro the following data (in `pa
 
 This macro will be invoked by the SRS system immediatelly after the current learning session has been deleted. You can use this hook for debug purpose or some validation.
 
-To make it work you should pass this macro title to the `tm-srs-delete-session` message in the `postDestroyHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `postDestroyHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-delete-session` message in the `postDestroyHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `postDestroyHook` attribute.
 
 The SRS system does not expect that the ''postDestroyHook'' returns any result.
 
@@ -110,7 +110,7 @@ The SRS system passes to the ''postDestroyHook'' macro the following data (in `p
 
 This macro will be invoked by the SRS system before accepting an answer from the user. You can use this hook for debug purpose or some validation. You can also prevent accepting the answer at all.
 
-To make it work you should pass this macro title to the `tm-srs-commit-answer` message in the `preAnswerHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `preAnswerHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-commit-answer` message in the `preAnswerHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `preAnswerHook` attribute.
 
 The SRS system expects that the ''preAnswerHook'' returns a boolean result. It must return `true` in order to proceed accepting the answer or `false` to prevent (abort) accepting the answer.
 
@@ -125,7 +125,7 @@ The SRS system passes to the ''preAnswerHook'' macro the following data (in `par
 
 This macro will be invoked by the SRS system immediatelly after accepting an answer from the user. You can use this hook for debug purpose or some validation.
 
-To make it work you should pass this macro title to the `tm-srs-commit-answer` message in the `postAnswerHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro title to the template via its `postAnswerHook` attribute.
+To make it work you should pass this macro export name to the `tm-srs-commit-answer` message in the `postAnswerHook` attribute. If you are using the predefined [[leranig session template|SrsLearningSessionDynamicTemplate]] you can pass the macro export name to the template via its `postAnswerHook` attribute.
 
 The SRS system does not expect that the ''postAnswerHook'' returns any result.
 
