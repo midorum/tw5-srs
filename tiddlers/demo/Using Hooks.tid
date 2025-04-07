@@ -31,7 +31,7 @@ A brief macro desription
 
 exports.name = "YOUR_MACRO_NAME";
 exports.params = [
-  {name: "wiki", description: "Object that allows to retrieve data from the wiki"},
+  {name: "wiki", description: "Reference to the wiki object"},
   {name: "params", description: "An object that contains some useful information about the learning session"}
 ];
 exports.run = function(wiki, params) {
@@ -48,7 +48,7 @@ You can read more about using JavaScript marcos in TiddlyWiki [[here|https://gro
 
 !!! Macro parameters
 
-The `wiki` parameter is the reference to the wiki object. The structure of this object is described in details [[here|Using Custom Data For Organizing Learning Session]]
+The `wiki` parameter is the reference to the wiki object. This object allows you to retrieve or change data in your wiki. Use it carefully.
 
 The `params` parameter is the object that contains some information about the learning session. Its content depends on a particular hook and is described below.
 
