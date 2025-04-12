@@ -790,7 +790,7 @@ Handling SRS messages.
     if (!hook) return true;
     const instance = context.env.macros[hook];
     if (!instance) return true;
-    return instance.run(context.wikiUtils.createProxyWiki(), paramsProvider.apply());
+    return instance.run(context.wikiUtils.wiki, paramsProvider.apply());
   }
 
 })();
