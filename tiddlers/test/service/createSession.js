@@ -274,9 +274,9 @@ describe("The createSession service", () => {
             const newFirst = undefined;
             const log = true;
             const idle = false;
-            const overdueTiddlerTemplate = { 
-                title: "overdueTiddler", 
-                tags: [src, context.tags.scheduledForward] ,
+            const overdueTiddlerTemplate = {
+                title: "overdueTiddler",
+                tags: [src, context.tags.scheduledForward],
                 'srs-forward-due': new Date().getTime(),
                 'srs-forward-last': new Date().getTime()
             };
@@ -328,9 +328,9 @@ describe("The createSession service", () => {
             const newFirst = true;
             const log = true;
             const idle = false;
-            const overdueTiddlerTemplate = { 
-                title: "overdueTiddler", 
-                tags: [src, context.tags.scheduledForward] ,
+            const overdueTiddlerTemplate = {
+                title: "overdueTiddler",
+                tags: [src, context.tags.scheduledForward],
                 'srs-forward-due': new Date().getTime(),
                 'srs-forward-last': new Date().getTime()
             };
@@ -365,6 +365,146 @@ describe("The createSession service", () => {
             expect(sessionData["counter-repeat"]).toEqual(0);
             expect(sessionData["counter-overdue"]).toEqual(1);
             expect(sessionData["counter-newcomer"]).toEqual(0);
+        })
+
+    it("should create a new session"
+        + " and invoke create hooks when they are defined"
+        + " when preCreateHook returns true", () => {
+            // console.warn(">>>");
+            const options = utils.setupWiki();
+            const context = utils.getSrsContext();
+            const ref = "$:/temp/srs/session";
+            const src = "some tag";
+            const direction = "both";
+            const limit = undefined;
+            const groupFilter = undefined;
+            const groupStrategy = undefined;
+            const newFirst = true;
+            const log = true;
+            const preCreateHook = "preCreateHook";
+            const postCreateHook = "postCreateHook";
+            const overdueTiddlerTemplate = {
+                title: "overdueTiddler",
+                tags: [src, context.tags.scheduledForward],
+                'srs-forward-due': new Date().getTime(),
+                'srs-forward-last': new Date().getTime()
+            };
+            options.widget.wiki.addTiddler(overdueTiddlerTemplate);
+            const idle = false;
+            options.env.macros[preCreateHook] = {
+                name: preCreateHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("preCreateHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(wiki.getTiddler(ref)).toBeUndefined();
+                    return true;
+                }
+            }
+            options.env.macros[postCreateHook] = {
+                name: postCreateHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("postCreateHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(params.next).toBeDefined();
+                    expect(params.next.src).toEqual(overdueTiddlerTemplate.title);
+                    expect(wiki.getTiddler(ref)).toBeDefined();
+                }
+            }
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            spyOn(options.env.macros[preCreateHook], 'run').and.callThrough();
+            spyOn(options.env.macros[postCreateHook], 'run').and.callThrough();
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                newFirst: newFirst,
+                preCreateHook: preCreateHook,
+                postCreateHook: postCreateHook,
+                log: log,
+                idle: idle
+            };
+            // consoleSpy.and.callThrough();
+            // consoleDebugSpy.and.callThrough();
+            expect(messageHandler.createSession(params, options.widget, options.env)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            expect(options.widget.wiki.getTiddler(ref)).toBeDefined();
+            expect(options.env.macros[preCreateHook].run).toHaveBeenCalledTimes(1);
+            expect(options.env.macros[postCreateHook].run).toHaveBeenCalledTimes(1);
+        })
+
+    it("should invoke preCreateHook and shouldn't create a session"
+        + " when preCreateHook returns false", () => {
+            // console.warn(">>>");
+            const options = utils.setupWiki();
+            const context = utils.getSrsContext();
+            const ref = "$:/temp/srs/session";
+            const src = "some tag";
+            const direction = "both";
+            const limit = undefined;
+            const groupFilter = undefined;
+            const groupStrategy = undefined;
+            const newFirst = true;
+            const log = true;
+            const preCreateHook = "preCreateHook";
+            const postCreateHook = "postCreateHook";
+            const idle = false;
+            options.env.macros[preCreateHook] = {
+                name: preCreateHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("preCreateHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(wiki.getTiddler(ref)).toBeUndefined();
+                    return false;
+                }
+            }
+            options.env.macros[postCreateHook] = {
+                name: postCreateHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("postCreateHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(wiki.getTiddler(ref)).toBeDefined();
+                }
+            }
+            options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+            spyOn(options.env.macros[preCreateHook], 'run').and.callThrough();
+            spyOn(options.env.macros[postCreateHook], 'run').and.callThrough();
+            const params = {
+                ref: ref,
+                src: src,
+                direction: direction,
+                limit: limit,
+                groupFilter: groupFilter,
+                groupStrategy: groupStrategy,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                newFirst: newFirst,
+                preCreateHook: preCreateHook,
+                postCreateHook: postCreateHook,
+                log: log,
+                idle: idle
+            };
+            // consoleSpy.and.callThrough();
+            // consoleDebugSpy.and.callThrough();
+            expect(messageHandler.createSession(params, options.widget, options.env)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            expect(options.widget.wiki.getTiddler(ref)).toBeUndefined();
+            expect(options.env.macros[preCreateHook].run).toHaveBeenCalledTimes(1);
+            expect(options.env.macros[postCreateHook].run).toHaveBeenCalledTimes(0);
         })
 
 });

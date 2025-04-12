@@ -31,7 +31,11 @@ describe("The deleteSession service", () => {
         const ref = undefined;
         const idle = true;
         const expectedMessage = "ref cannot be empty";
-        expect(messageHandler.deleteSession(ref, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            idle: idle
+        }
+        expect(messageHandler.deleteSession(params, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -42,7 +46,11 @@ describe("The deleteSession service", () => {
         const ref = "some";
         const idle = true;
         const expectedMessage = "SRS session not found.";
-        expect(messageHandler.deleteSession(ref, idle, options.widget)).nothing();
+        const params = {
+            ref: ref,
+            idle: idle
+        }
+        expect(messageHandler.deleteSession(params, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(1);
         const results = Logger.alert.calls.first().args;
         expect(results[0]).toContain(expectedMessage);
@@ -52,7 +60,7 @@ describe("The deleteSession service", () => {
         const options = utils.setupWiki();
         const ref = "some";
         const idle = false;
-        const params = {
+        const createParams = {
             ref: ref,
             src: "some",
             direction: "both",
@@ -65,11 +73,74 @@ describe("The deleteSession service", () => {
             log: true,
             idle: idle
         };
-        expect(messageHandler.createSession(params, options.widget)).nothing();
+        const deleteParams = {
+            ref: ref,
+            idle: idle
+        }
+        expect(messageHandler.createSession(createParams, options.widget)).nothing();
         expect(options.widget.wiki["srs-session"]).toBeDefined();
-        expect(messageHandler.deleteSession(ref, idle, options.widget)).nothing();
+        expect(messageHandler.deleteSession(deleteParams, options.widget)).nothing();
         expect(Logger.alert).toHaveBeenCalledTimes(0);
         expect(options.widget.wiki["srs-session"]).toBeUndefined();
     })
+
+    it("should delete an exist session"
+        + " and invoke delete hooks when they are defined"
+        + " when preDestroyHook returns true", () => {
+            const options = utils.setupWiki();
+            const ref = "some";
+            const preDestroyHook = "preDestroyHook";
+            const postDestroyHook = "postDestroyHook";
+            const idle = false;
+            options.env.macros[preDestroyHook] = {
+                name: preDestroyHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("preDestroyHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(options.widget.wiki["srs-session"]).toBeDefined();
+                    return true;
+                }
+            }
+            options.env.macros[postDestroyHook] = {
+                name: postDestroyHook,
+                params: [],
+                run: function (wiki, params) {
+                    console.debug("postDestroyHook hook params", params);
+                    expect(wiki).toBeDefined();
+                    expect(params).toBeDefined();
+                    expect(options.widget.wiki["srs-session"]).toBeUndefined();
+                }
+            }
+            spyOn(options.env.macros[preDestroyHook], 'run').and.callThrough();
+            spyOn(options.env.macros[postDestroyHook], 'run').and.callThrough();
+            const createParams = {
+                ref: ref,
+                src: "some",
+                direction: "both",
+                limit: undefined,
+                groupFilter: undefined,
+                groupStrategy: undefined,
+                groupListFilter: undefined,
+                groupLimit: undefined,
+                resetAfter: undefined,
+                log: true,
+                idle: idle
+            };
+            const deleteParams = {
+                ref: ref,
+                preDestroyHook: preDestroyHook,
+                postDestroyHook: postDestroyHook,
+                idle: idle
+            }
+            expect(messageHandler.createSession(createParams, options.widget, options.env)).nothing();
+            expect(options.widget.wiki["srs-session"]).toBeDefined();
+            expect(messageHandler.deleteSession(deleteParams, options.widget, options.env)).nothing();
+            expect(Logger.alert).toHaveBeenCalledTimes(0);
+            expect(options.widget.wiki["srs-session"]).toBeUndefined();
+            expect(options.env.macros[preDestroyHook].run).toHaveBeenCalledTimes(1);
+            expect(options.env.macros[postDestroyHook].run).toHaveBeenCalledTimes(1);
+        })
 
 });

@@ -39,6 +39,12 @@ Additionally every card template should have the `srs-current-type` field with t
 |!onwardButtonText | no |a text of the button to advance the question to the next position of the learning curve |
 |!excludeButtonText | no |a text of the button to fast exclude the question from the SRS |
 |!answerTipText | no |a text of the hint displayed at the bottom of the answer card and explaining how to correctly interpret your answer |
+|!preCreateHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked before the learning session is created (see [[here|Using Hooks]] for more information) |
+|!postCreateHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked after the learning session is created (see [[here|Using Hooks]] for more information) |
+|!preDestroyHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked before the learning session is destroyed (see [[here|Using Hooks]] for more information) |
+|!postDestroyHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked after the learning session is destroyed (see [[here|Using Hooks]] for more information) |
+|!preAnswerHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked before the user answer is accepted (see [[here|Using Hooks]] for more information) |
+|!postAnswerHook | no |a [[JavaScript marco|https://groktiddlywiki.com/read/#JavaScript%20Macros]] title that will be invoked after the user answer is accepted (see [[here|Using Hooks]] for more information) |
 |!log | no |pass `true` if you want log session data into browser console |
 
 Supported values for `directions` attribute:

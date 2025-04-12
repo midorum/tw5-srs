@@ -36,7 +36,6 @@ describe("The commitAnswer service", () => {
             const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
             const groupFilter = "[<currentTiddler>tag<groupTitle>]"; // take item if it has apropriate group tag
             const groupLimit = 2; // two items from each group
-            const relatedFilter = undefined;
             const log = true;
             const idle = false;
             const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -46,7 +45,7 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             // consoleSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: src,
                 direction: direction,
@@ -59,7 +58,14 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: "onward",
+                updateRelated: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const expectedTiddlersCount = 4;
             var actualTiddlersCount = 0;
@@ -70,7 +76,7 @@ describe("The commitAnswer service", () => {
                 if (asked.src) {
                     actualTiddlersCount++;
                 }
-                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                 asked = verifySession(ref, src, direction, options);
             } while (asked.src)
             expect(expectedTiddlersCount).toEqual(actualTiddlersCount);
@@ -91,7 +97,6 @@ describe("The commitAnswer service", () => {
             const groupListFilter = "[[" + group1 + "]][[" + group2 + "]]"; // two groups
             const groupFilter = "[<currentTiddler>tag<groupTitle>]"; // take item if it has apropriate group tag
             const groupLimit = 2; // two items from each group
-            const relatedFilter = undefined;
             const log = true;
             const idle = false;
             const sourceTiddlers = createSourceTiddlers(src, [group1, group2, skippedGroup], options, context);
@@ -101,7 +106,7 @@ describe("The commitAnswer service", () => {
             options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
             // consoleSpy.and.callThrough();
             loggerSpy.and.callThrough();
-            const params = {
+            const createSessionParams = {
                 ref: ref,
                 src: src,
                 direction: direction,
@@ -114,7 +119,14 @@ describe("The commitAnswer service", () => {
                 log: log,
                 idle: idle
             };
-            expect(messageHandler.createSession(params, options.widget)).nothing();
+            const commitAnswerParams = {
+                ref: ref,
+                answer: "onward",
+                updateRelated: undefined,
+                log: log,
+                idle: idle
+            };
+            expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
             expect(Logger.alert).toHaveBeenCalledTimes(0);
             const expectedTiddlersCount = 10;
             var actualTiddlersCount = 0;
@@ -125,7 +137,7 @@ describe("The commitAnswer service", () => {
                 if (asked.src) {
                     actualTiddlersCount++;
                 }
-                expect(messageHandler.commitAnswer(ref, "onward", relatedFilter, log, idle, options.widget)).nothing();
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
                 asked = verifySession(ref, src, direction, options);
             } while (asked.src)
             expect(expectedTiddlersCount).toEqual(actualTiddlersCount);
