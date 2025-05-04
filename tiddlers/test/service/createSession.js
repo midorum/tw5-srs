@@ -261,7 +261,7 @@ describe("The createSession service", () => {
 
     it("should create a new session"
         + " and schedule an overdue tiddler to learn"
-        + " when the `newFirst` parameter is not set", () => {
+        + " when the `order` parameter is not set", () => {
             // console.warn(">>>");
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
@@ -271,7 +271,6 @@ describe("The createSession service", () => {
             const limit = undefined;
             const groupFilter = undefined;
             const groupStrategy = undefined;
-            const newFirst = undefined;
             const log = true;
             const idle = false;
             const overdueTiddlerTemplate = {
@@ -294,7 +293,7 @@ describe("The createSession service", () => {
                 groupListFilter: undefined,
                 groupLimit: undefined,
                 resetAfter: undefined,
-                newFirst: newFirst,
+                order: undefined,
                 log: log,
                 idle: idle
             };
@@ -315,7 +314,7 @@ describe("The createSession service", () => {
 
     it("should create a new session"
         + " and schedule a new tiddler to learn"
-        + " when the `newFirst` parameter is set", () => {
+        + " when the `order` parameter is set to 'newFirst'", () => {
             // console.warn(">>>");
             const options = utils.setupWiki();
             const context = utils.getSrsContext();
@@ -325,7 +324,7 @@ describe("The createSession service", () => {
             const limit = undefined;
             const groupFilter = undefined;
             const groupStrategy = undefined;
-            const newFirst = true;
+            const order = "newFirst";
             const log = true;
             const idle = false;
             const overdueTiddlerTemplate = {
@@ -348,7 +347,7 @@ describe("The createSession service", () => {
                 groupListFilter: undefined,
                 groupLimit: undefined,
                 resetAfter: undefined,
-                newFirst: newFirst,
+                order: order,
                 log: log,
                 idle: idle
             };
@@ -379,7 +378,7 @@ describe("The createSession service", () => {
             const limit = undefined;
             const groupFilter = undefined;
             const groupStrategy = undefined;
-            const newFirst = true;
+            const order = "newFirst";
             const log = true;
             const preCreateHook = "preCreateHook";
             const postCreateHook = "postCreateHook";
@@ -427,7 +426,7 @@ describe("The createSession service", () => {
                 groupListFilter: undefined,
                 groupLimit: undefined,
                 resetAfter: undefined,
-                newFirst: newFirst,
+                order: order,
                 preCreateHook: preCreateHook,
                 postCreateHook: postCreateHook,
                 log: log,
@@ -453,7 +452,7 @@ describe("The createSession service", () => {
             const limit = undefined;
             const groupFilter = undefined;
             const groupStrategy = undefined;
-            const newFirst = true;
+            const order = "newFirst";
             const log = true;
             const preCreateHook = "preCreateHook";
             const postCreateHook = "postCreateHook";
@@ -492,7 +491,7 @@ describe("The createSession service", () => {
                 groupListFilter: undefined,
                 groupLimit: undefined,
                 resetAfter: undefined,
-                newFirst: newFirst,
+                order: order,
                 preCreateHook: preCreateHook,
                 postCreateHook: postCreateHook,
                 log: log,
