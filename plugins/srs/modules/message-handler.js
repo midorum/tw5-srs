@@ -16,7 +16,7 @@ Handling SRS messages.
   const cache = require("$:/plugins/midorum/srs/modules/cache.js");
   const SCHEDULING_CONFIGURATION_PREFIX = "$:/config/midorum/srs/scheduling";
 
-  const Session = function (src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, newFirst, listProvider, context) {
+  const Session = function (src, direction, limit, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, order, listProvider, context) {
     const dueComparator = (a, b) => a.due - b.due;
     const getCurrentTime = () => new Date().getTime();
     var _takeForward = direction === utils.FORWARD_DIRECTION || direction === utils.BOTH_DIRECTION;
@@ -28,6 +28,8 @@ Handling SRS messages.
     const _resetAfter = resetAfter && resetAfter > 0 ? resetAfter * 60000 : resetAfter === 0 || resetAfter === -1 ? 86400000 : 600000;
     const _resetWhenEmpty = resetAfter === -1;
     const _listProvider = listProvider && context.env.macros[listProvider] ? context.env.macros[listProvider] : undefined;
+    const orderNewFirst = order === "newFirst";
+    const orderProvided = order === "provided";
     var _ttl;
     var _repeat = [];
     var _overdue = [];
@@ -255,7 +257,7 @@ Handling SRS messages.
           return;
         }
         entry['type'] = currentType;
-        if (entry.due && entry.due !== utils.SRS_BASE_TIME) {
+        if (!orderProvided && entry.due && entry.due !== utils.SRS_BASE_TIME) {
           _overdue.push(entry);
         } else {
           _newcomer.push(entry);
@@ -264,7 +266,7 @@ Handling SRS messages.
     }
 
     function nextFromDepot() {
-      if (newFirst) {
+      if (orderNewFirst) {
         if (_newcomer.length !== 0) return _newcomer.shift();
         if (_overdue.length !== 0) return _overdue.shift();
       } else {
@@ -334,7 +336,7 @@ Handling SRS messages.
       + "\nresetAfter: " + _resetAfter
       + "\nresetWhenEmpty: " + _resetWhenEmpty
       + "\nlistProvider: " + listProvider
-      + "\nnewFirst: " + newFirst
+      + "\norder: " + order
     );
 
     return {
@@ -503,13 +505,13 @@ Handling SRS messages.
     const groupListFilter = listProvider ? undefined : utils.trimToUndefined(params.groupListFilter);
     const groupLimit = params.groupLimit ? utils.parseInteger(params.groupLimit, 0) : 0;
     const resetAfter = params.resetAfter ? utils.parseInteger(params.resetAfter, 10) : 10;
-    const newFirst = !!params.newFirst;
+    const order = utils.trimToUndefined(params.order);
     if (params.idle) {
       console.log("SRS:createSession", params.idle, ref, src, direction, limit, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter);
       return;
     }
     const now = new Date().getTime();
-    const session = new Session(src, direction, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, newFirst, listProvider, context);
+    const session = new Session(src, direction, limitValue, groupFilter, groupStrategy, groupListFilter, groupLimit, resetAfter, order, listProvider, context);
     widget.wiki["srs-session"] = session;
     const first = session.getFirst(params.log);
     // const nextSteps = first.entry ? getNextStepsForTiddler(context.wikiUtils.withTiddler(first.entry.src), getSrsFieldsNames(first.entry.direction, context), context) : undefined;

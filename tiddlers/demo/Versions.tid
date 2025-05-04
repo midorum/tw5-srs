@@ -1,6 +1,10 @@
 title: Versions
 type: text/vnd.tiddlywiki
 
+!! 0.1.10
+
+* replaced the session option `newFirst` with the option `order` for more session order control (see [[here|SrsLearningSessionDynamicTemplate]] for details)
+
 !! 0.1.9
 
 * implemented a [[hook mechanism|Using Hooks]]
@@ -12,7 +16,7 @@ type: text/vnd.tiddlywiki
 * deprecated the [[SrsLearningSessionTemplate]] template
 * optionally preset SRS related fields when scheduling a tiddler (to make this done set the `preset` param for `tm-srs-schedule` message to `true`)
 * update SRS related fields on associated tiddlers by a filter expression while commiting the user answer (see [[here|Commiting Answer for Associated Tiddlers]] for details)
-* added a new session option `newFirst` which allows to see new tiddlers before overdue ones in the learning session (by default overdue tiddlers have a precedence)
+* added a new session option `newFirst` which allows to see new tiddlers before overdue ones in the learning session (by default overdue tiddlers have a precedence) (see [[here|SrsLearningSessionDynamicTemplate]] for details)
 
 !! 0.1.7
 
@@ -24,7 +28,7 @@ type: text/vnd.tiddlywiki
 
 !! 0.1.5
 
-* new session option `resetAfter`  - time in minutes when the session will be refilled with new content (10 - by default; 0 - no refill; -1 - auto refill when the session becomes empty)
+* new session option `resetAfter`  - time in minutes when the session will be refilled with new content (10 - by default; 0 - no refill; -1 - auto refill when the session becomes empty) (see [[here|SrsLearningSessionTemplate]] for details)
 
 !! 0.1.4
 

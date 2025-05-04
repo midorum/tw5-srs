@@ -425,6 +425,152 @@ describe("The createSession service", () => {
                 expect(sessionData["counter-newcomer"]).toEqual(0);
             })
 
+        it("should create a new session"
+            + " and schedule two tiddlers to learn"
+            + " and preserve the order of the learning session accorting to the custom list order", () => {
+                // consoleDebugSpy.and.callThrough();
+                // consoleSpy.and.callThrough();
+                const options = utils.setupWiki();
+                const context = utils.getSrsContext();
+                const ref = "$:/temp/srs/session";
+                const listProvider = "listProvider";
+                const src1 = "src1";
+                const src2 = "src2";
+                const src3 = "src3";
+                const overdueTime = new Date().getTime() + 10000;
+                const limit = undefined;
+                const log = true;
+                const idle = false;
+                const src1Template = {
+                    title: "src1_scheduledForward",
+                    tags: [src1, context.tags.scheduledForward],
+                    'srs-forward-due': overdueTime + 10000
+                };
+                const src2Template = {
+                    title: "src2_scheduledBackward",
+                    tags: [src2, context.tags.scheduledBackward],
+                    'srs-backward-due': overdueTime
+                };
+                const src3Template = {
+                    title: "src3_scheduledBackward",
+                    tags: [src3, context.tags.scheduledBackward],
+                    'srs-backward-due': overdueTime + 10000
+                };
+                options.env.macros[listProvider] = {
+                    name: listProvider,
+                    params: [],
+                    run: function (wiki, direction, limit, time) {
+                        // wiki.getTiddlersWithTag(src1).forEach(tiddler => {
+                        //     console.warn(tiddler);
+                        // });
+                        // wiki.filterTiddlers("[tag[" + src2 + "]]").forEach(tiddler => {
+                        //     console.warn(tiddler);
+                        // });
+                        // wiki.allTitles().forEach(tiddler => {
+                        //     console.warn(tiddler, wiki.tiddlerExists(tiddler), wiki.getSrsData(tiddler));
+                        // });
+                        return [
+                            {
+                                type: src1,
+                                src: src1Template.title,
+                                direction: "forward"
+                            },
+                            {
+                                type: src2,
+                                src: src2Template.title,
+                                direction: "backward"
+                            },
+                            {
+                                type: src3,
+                                src: src3Template.title,
+                                direction: "backward"
+                            }
+                        ];
+                    }
+                }
+                options.widget.wiki.addTiddler(src1Template);
+                options.widget.wiki.addTiddler(src2Template);
+                options.widget.wiki.addTiddler(src3Template);
+                options.widget.wiki.addTiddler({ title: "$:/config/midorum/srs/scheduling/strategy", text: "linear" });
+                const createSessionParams = {
+                    ref: ref,
+                    src: undefined,
+                    direction: undefined,
+                    order: "provided",
+                    limit: limit,
+                    groupFilter: undefined,
+                    groupStrategy: undefined,
+                    groupListFilter: undefined,
+                    groupLimit: undefined,
+                    resetAfter: undefined,
+                    listProvider: listProvider,
+                    log: log,
+                    idle: idle
+                };
+                const commitAnswerParams = {
+                    ref: ref,
+                    answer: "onward",
+                    updateRelated: undefined,
+                    log: log,
+                    idle: idle
+                };
+                // create a session
+                expect(messageHandler.createSession(createSessionParams, options.widget, options.env)).nothing();
+                expect(Logger.alert).toHaveBeenCalledTimes(0);
+                if (alert = Logger.alert.calls.first()) console.warn(alert.args)
+                var sessionInstance = options.widget.wiki.getTiddler(ref);
+                console.debug("after creation", sessionInstance);
+                expect(sessionInstance).toBeDefined();
+                var sessionData = JSON.parse(sessionInstance.fields.text);
+                expect(sessionData).toBeDefined();
+                expect(sessionData.src).toEqual("provided");
+                expect(sessionData["current-src"]).toEqual(src1Template.title);
+                expect(sessionData["current-direction"]).toEqual("forward");
+                expect(sessionData["current-type"]).toEqual(src1);
+                expect(sessionData["counter-repeat"]).toEqual(0);
+                expect(sessionData["counter-overdue"]).toEqual(0);
+                expect(sessionData["counter-newcomer"]).toEqual(2);
+                // answer first question
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
+                sessionInstance = options.widget.wiki.getTiddler(ref);
+                console.debug("after first answer", sessionInstance);
+                expect(sessionInstance).toBeDefined();
+                sessionData = JSON.parse(sessionInstance.fields.text);
+                expect(sessionData).toBeDefined();
+                expect(sessionData["current-src"]).toEqual(src2Template.title);
+                expect(sessionData["current-direction"]).toEqual("backward");
+                expect(sessionData["current-type"]).toEqual(src2);
+                expect(sessionData["counter-repeat"]).toEqual(1);
+                expect(sessionData["counter-overdue"]).toEqual(0);
+                expect(sessionData["counter-newcomer"]).toEqual(1);
+                // answer second question
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
+                sessionInstance = options.widget.wiki.getTiddler(ref);
+                console.debug("after second answer", sessionInstance);
+                expect(sessionInstance).toBeDefined();
+                sessionData = JSON.parse(sessionInstance.fields.text);
+                expect(sessionData).toBeDefined();
+                expect(sessionData["current-src"]).toEqual(src3Template.title);
+                expect(sessionData["current-direction"]).toEqual("backward");
+                expect(sessionData["current-type"]).toEqual(src3);
+                expect(sessionData["counter-repeat"]).toEqual(2);
+                expect(sessionData["counter-overdue"]).toEqual(0);
+                expect(sessionData["counter-newcomer"]).toEqual(0);
+                // answer third question
+                expect(messageHandler.commitAnswer(commitAnswerParams, options.widget, options.env)).nothing();
+                sessionInstance = options.widget.wiki.getTiddler(ref);
+                console.debug("after third answer", sessionInstance);
+                expect(sessionInstance).toBeDefined();
+                sessionData = JSON.parse(sessionInstance.fields.text);
+                expect(sessionData).toBeDefined();
+                expect(sessionData["current-src"]).toBeUndefined();
+                expect(sessionData["current-direction"]).toBeUndefined();
+                expect(sessionData["current-type"]).toBeUndefined();
+                expect(sessionData["counter-repeat"]).toEqual(3);
+                expect(sessionData["counter-overdue"]).toEqual(0);
+                expect(sessionData["counter-newcomer"]).toEqual(0);
+            })
+
     });
 
 });
